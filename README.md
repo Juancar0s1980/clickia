@@ -14,8 +14,8 @@ En construcción por fases. Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 para la arquitectura completa y el detalle de cada fase.
 
 - [x] Fase 1 — Arquitectura y diseño
-- [ ] Fase 2 — Base de datos
-- [ ] Fase 3 — Backend
+- [x] Fase 2 — Base de datos
+- [x] Fase 3 — Backend
 - [ ] Fase 4 — Integración IA
 - [ ] Fase 5 — Frontend
 - [ ] Fase 6 — Seguridad
@@ -38,5 +38,5 @@ docs/       Documentación técnica
 
 ## Instalación
 
-_Se documentará al cierre de cada fase correspondiente (backend en Fase 3,
-frontend en Fase 5, Docker en Fase 8)._
+Ver [backend/README.md](backend/README.md) para instalar y ejecutar la API.
+El frontend se documentará en la Fase 5 y Docker en la Fase 8.
