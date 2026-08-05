@@ -22,4 +22,10 @@ export const env = {
   groqModel: process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile",
   // "gemini" | "groq" | "" (vacio = autodetectar segun que API key este configurada)
   aiProvider: process.env.AI_PROVIDER ?? "",
+
+  rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
+  rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 300),
+  authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 10),
+  aiRateLimitWindowMs: Number(process.env.AI_RATE_LIMIT_WINDOW_MS ?? 5 * 60 * 1000),
+  aiRateLimitMax: Number(process.env.AI_RATE_LIMIT_MAX ?? 15),
 };

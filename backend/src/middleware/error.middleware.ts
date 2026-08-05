@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { logger } from "../config/logger";
 import { ApiError } from "../utils/ApiError";
 
 export function notFoundHandler(req: Request, res: Response): void {
@@ -12,6 +13,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return;
   }
 
-  console.error("[unhandled error]", err);
+  logger.error({ err }, "unhandled error");
   res.status(500).json({ error: "Error interno del servidor" });
 }

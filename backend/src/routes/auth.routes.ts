@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { authController } from "../controllers/auth.controller";
+import { authRateLimiter } from "../middleware/rateLimit.middleware";
 import { validateBody } from "../middleware/validate.middleware";
 import { loginSchema, refreshSchema } from "../validators/auth.validator";
 
 const router = Router();
+
+router.use(authRateLimiter);
 
 router.post("/login", validateBody(loginSchema), authController.login);
 router.post("/refresh", validateBody(refreshSchema), authController.refresh);

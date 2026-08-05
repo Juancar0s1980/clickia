@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { env } from "../../config/env";
+import { logger } from "../../config/logger";
 import { AiProvider } from "./types";
 import { withTimeout } from "./withTimeout";
 
@@ -35,7 +36,7 @@ export const groqProvider: AiProvider = {
       );
       return completion.choices[0]?.message.content?.trim() || null;
     } catch (err) {
-      console.error("[groq] chat.completions.create failed:", err instanceof Error ? err.message : err);
+      logger.error({ err }, "groq chat.completions.create failed");
       return null;
     }
   },

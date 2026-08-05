@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { env } from "../../config/env";
+import { logger } from "../../config/logger";
 import { AiProvider } from "./types";
 import { withTimeout } from "./withTimeout";
 
@@ -31,7 +32,7 @@ export const geminiProvider: AiProvider = {
       );
       return response.text?.trim() || null;
     } catch (err) {
-      console.error("[gemini] generateContent failed:", err instanceof Error ? err.message : err);
+      logger.error({ err }, "gemini generateContent failed");
       return null;
     }
   },
