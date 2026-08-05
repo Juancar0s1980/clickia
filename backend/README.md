@@ -55,25 +55,43 @@ Auth: header `Authorization: Bearer <accessToken>`.
 
 `POST /chat` implementa RAG: recupera contexto de `technical_problems` +
 `solutions` + estado de red (`src/services/knowledgeBase.service.ts`,
-`networkStatus.service.ts`) y se lo pasa como "CONTEXTO" a Gemini
+`networkStatus.service.ts`) y se lo pasa como "CONTEXTO" a un LLM
 (`src/services/ai/`), con instrucciones estrictas de no inventar información
 fuera de ese contexto (`promptBuilder.ts`).
 
-- `GEMINI_API_KEY` / `GEMINI_MODEL` en `.env` (modelo por defecto:
-  `gemini-2.0-flash`).
-- Si la API key no está configurada, la llamada falla o hace timeout
+**Proveedor intercambiable:** `src/services/ai/types.ts` define la interfaz
+`AiProvider`; `gemini.client.ts` y `groq.client.ts` la implementan. El
+sistema no depende de un proveedor concreto (tal como establece la Fase 1 en
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)):
+
+- `AI_PROVIDER=groq|gemini` fuerza el proveedor. Vacío = autodetección
+  (usa el primero con API key configurada; Groq antes que Gemini).
+- `GROQ_API_KEY` / `GROQ_MODEL` (por defecto `llama-3.3-70b-versatile`).
+- `GEMINI_API_KEY` / `GEMINI_MODEL` (por defecto `gemini-2.0-flash`).
+- Si ningún proveedor está configurado, la llamada falla o hace timeout
   (10s), el sistema degrada automáticamente a una respuesta generada por
   plantilla determinística (`src/services/replyComposer.ts`) construida
   sobre el mismo contexto — el chat nunca se rompe por una falla del
   proveedor de IA.
-- La respuesta de `/api/chat` incluye `"source": "gemini" | "fallback_template"`
-  para que el frontend (y QA) pueda distinguir cuál generó la respuesta.
+- La respuesta de `/api/chat` incluye `"source"` (`"groq"`, `"gemini"` o
+  `"fallback_template"`) para que el frontend (y QA) sepan qué la generó.
 
-**Validado:** se probó con una API key real de Gemini; la autenticación
-fue exitosa (no hubo error 401/403), pero la cuenta devolvió
-`429 RESOURCE_EXHAUSTED` (sin créditos/facturación activa en AI Studio). El
-fallback respondió correctamente ante ese error real, confirmando que el
-mecanismo de resiliencia funciona en producción, no solo en teoría.
+**Validado con ambos proveedores:**
+- Gemini: API key real, autenticación exitosa, pero la cuenta devolvió
+  `429 RESOURCE_EXHAUSTED` (sin créditos en AI Studio) → activó el fallback
+  correctamente.
+- Groq: API key real, generó respuestas coherentes usando el contexto (zona
+  con falla + pasos de la base de conocimiento) sin inventar información, y
+  pidió más detalle ante un mensaje ambiguo en vez de adivinar un problema.
+
+**Bug encontrado y corregido durante la prueba con Groq:** el matcher de
+`knowledgeBase.service.ts` usaba `string.includes()` (coincidencia por
+substring), así que un mensaje genérico como "tengo una duda" matcheaba por
+error con "Router con luz roja" porque el token "una" es substring literal
+de su descripción ("muestra **una** luz..."). Se corrigió a comparación por
+palabra completa (`Set` de tokens) más una lista de stopwords en español, y
+se reverificó que los casos reales (wifi lento, router con luz roja) siguen
+matcheando correctamente.
 
 ## Pruebas manuales (sin backend de test aún, ver Fase 7)
 

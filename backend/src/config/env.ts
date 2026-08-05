@@ -18,4 +18,8 @@ export const env = {
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
   geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
+  groqApiKey: process.env.GROQ_API_KEY ?? "",
+  groqModel: process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile",
+  // "gemini" | "groq" | "" (vacio = autodetectar segun que API key este configurada)
+  aiProvider: process.env.AI_PROVIDER ?? "",
 };
