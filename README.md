@@ -19,7 +19,7 @@ para la arquitectura completa y el detalle de cada fase.
 - [x] Fase 4 — Integración IA
 - [x] Fase 5 — Frontend
 - [x] Fase 6 — Seguridad
-- [ ] Fase 7 — Testing
+- [x] Fase 7 — Testing
 - [ ] Fase 8 — Docker y despliegue
 
 ## Stack

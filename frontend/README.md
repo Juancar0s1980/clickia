@@ -63,3 +63,24 @@ desde `useConversation` se disparaba (a) al crear una conversación nueva y
 pisaba con `null` el diagnóstico/ticket que se acababan de mostrar. Se
 corrigió distinguiendo "cambio real de conversación" de "refetch de fondo de
 la misma conversación" con una referencia (`lastSyncedConversationIdRef`).
+
+## Tests automatizados (Fase 7)
+
+Vitest + React Testing Library. Los hooks (`useConversations`, `useChat`,
+`useTickets`) se mockean para probar el comportamiento de cada página sin
+depender de red real ni de un `QueryClientProvider`.
+
+```bash
+npm test
+```
+
+- `LoginPage.test.tsx`: errores de validación, llamada a `login` con las
+  credenciales correctas, error del servidor mostrado en pantalla.
+- `ChatPage.test.tsx`: enviar un mensaje por botón rápido crea la
+  conversación y muestra la respuesta de IA junto al panel de diagnóstico;
+  crear un ticket desde ese diagnóstico muestra el número de ticket; un
+  fallo al enviar el mensaje muestra el error sin romper el chat.
+
+jsdom no implementa `Element.scrollIntoView` (lo usa `ChatPage` para
+desplazar al último mensaje); se poliféna en `src/test/setup.ts`, junto con
+el `cleanup()` de Testing Library entre tests.

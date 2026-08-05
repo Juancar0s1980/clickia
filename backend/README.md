@@ -135,7 +135,7 @@ mensajes legítimos, y el rate limit de IA por usuario bloqueó el 3er
 mensaje con el límite bajado a 2. El flujo completo del frontend se
 re-verificó en navegador con toda la seguridad activa, sin regresiones.
 
-## Pruebas manuales (sin backend de test aún, ver Fase 7)
+## Pruebas manuales
 
 ```bash
 curl -X POST localhost:4000/api/users -H "Content-Type: application/json" \
@@ -148,3 +148,43 @@ curl -X POST localhost:4000/api/chat -H "Content-Type: application/json" \
   -H "Authorization: Bearer <accessToken>" \
   -d '{"message":"No tengo internet","zone":"Centro"}'
 ```
+
+## Tests automatizados (Fase 7)
+
+Jest + Supertest, contra una base de datos de test real (no se mockea
+PostgreSQL — las queries parametrizadas y las restricciones del esquema son
+parte de lo que se está probando).
+
+```bash
+docker run -d --name clickia_test_pg -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=clickia_test -p 55433:5432 postgres:16-alpine
+
+cp .env.test.example .env.test   # ajustar DATABASE_URL si cambias el puerto
+
+npm test
+```
+
+`jest.global-setup.js` aplica migraciones + seed una sola vez antes de toda
+la suite (reutiliza `src/database/migrate.ts`). `GEMINI_API_KEY` y
+`GROQ_API_KEY` van vacías a propósito en `.env.test.example`: sin proveedor
+configurado, `/chat` siempre cae a la plantilla de fallback, así los tests
+son deterministas y no dependen de un LLM real.
+
+**Cobertura (46 tests):**
+
+- **Unitarias** (mockeando repositorios/red, sin DB):
+  `knowledgeBase.service.test.ts` (incluye test de regresión del bug de
+  falsos positivos por substring de la Fase 4), `replyComposer.test.ts`,
+  `aiGuard.test.ts` (bloqueo de prompt injection y rate limit por usuario),
+  `sanitize.test.ts`, `jwt.test.ts`, `password.test.ts`.
+- **Integración** (Supertest + DB real): `auth.test.ts` (registro, login,
+  rotación de refresh token, rutas protegidas), `chat.test.ts` (crear/
+  continuar conversación, aislamiento entre usuarios, AI Guard end-to-end),
+  `tickets.test.ts` (creación, escalamiento de conversación, aislamiento
+  por usuario), `network.test.ts` (API ISP simulada).
+
+**Bug encontrado y corregido al escribir los tests:** `sanitizeText`
+eliminaba los tabs como caracteres de control *antes* de colapsar espacios
+repetidos, así que `"hola\t\tmundo"` quedaba como `"holamundo"` (sin
+espacio) en vez de `"hola mundo"`. Se corrigió preservando tab y newline en
+el filtro de control chars para que el paso de colapso los normalice.
