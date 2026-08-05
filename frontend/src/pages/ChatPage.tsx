@@ -10,14 +10,15 @@ import { TicketCreatedCard } from "../components/chat/TicketCreatedCard";
 import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { Spinner } from "../components/ui/Spinner";
+import { ZONES } from "../constants/zones";
 import { useConversation, useConversations } from "../hooks/useConversations";
 import { useSendMessage } from "../hooks/useChat";
 import { useCreateTicket } from "../hooks/useTickets";
 import { extractErrorMessage } from "../services/httpClient";
+import { zoneStorage } from "../services/zoneStorage";
 import { ChatResponse, Message, Ticket } from "../types/api";
 
 const QUICK_ACTIONS = ["No tengo internet", "WiFi lento", "Router con luz roja"];
-const DEFAULT_ZONE = "Centro";
 
 export function ChatPage() {
   const location = useLocation();
@@ -29,7 +30,13 @@ export function ChatPage() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<Ticket | null>(null);
+  const [zone, setZone] = useState<string | null>(() => zoneStorage.get());
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  function selectZone(newZone: string) {
+    zoneStorage.set(newZone);
+    setZone(newZone);
+  }
 
   const { data: conversations, isLoading: isConversationsLoading } = useConversations();
   const { data: loadedConversation, isLoading: isLoadingMessages } = useConversation(activeConversationId);
@@ -94,7 +101,7 @@ export function ChatPage() {
       const result = await sendMessage.mutateAsync({
         conversationId: activeConversationId ?? undefined,
         message: text,
-        zone: DEFAULT_ZONE,
+        zone: zone ?? undefined,
       });
       if (activeConversationId === null) {
         suppressNextSyncRef.current = true;
@@ -135,71 +142,97 @@ export function ChatPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 bg-white px-4 py-3">
-          {QUICK_ACTIONS.map((label) => (
-            <QuickActionButton key={label} label={label} onClick={() => handleSend(label)} disabled={isBusy} />
-          ))}
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-          {isLoadingMessages && (
-            <div className="flex justify-center py-6">
-              <Spinner />
-            </div>
-          )}
-
-          {!isLoadingMessages && messages.length === 0 && (
-            <div className="flex h-full flex-col items-center justify-center text-center text-slate-400">
-              <p className="text-sm">Cuéntame qué problema tienes con tu internet.</p>
-              <p className="text-xs">Puedes usar los botones rápidos de arriba o escribir tu propio mensaje.</p>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-3">
-            {messages.map((m) => (
-              <ChatBubble key={m.id} message={m} />
-            ))}
-            {isBusy && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl rounded-bl-sm bg-white px-4 py-2.5 shadow-sm">
-                  <Spinner size="sm" />
-                </div>
+        {zone === null ? (
+          <div className="flex flex-1 items-center justify-center p-6">
+            <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+              <p className="mb-1 text-sm font-semibold text-slate-700">¿En qué zona te encuentras?</p>
+              <p className="mb-4 text-xs text-slate-500">
+                Lo necesitamos para revisar el estado del servicio en tu área antes de diagnosticar tu problema.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {ZONES.map((z) => (
+                  <Button key={z} variant="secondary" onClick={() => selectZone(z)}>
+                    {z}
+                  </Button>
+                ))}
               </div>
-            )}
+            </div>
           </div>
-
-          {lastResult && (
-            <div className="mt-4 flex flex-col gap-3">
-              <DiagnosticSteps result={lastResult} />
-              {!createdTicket && !showTicketForm && (
-                <Button variant="secondary" className="w-fit" onClick={() => setShowTicketForm(true)}>
-                  ¿No se resolvió? Crear ticket de soporte
-                </Button>
-              )}
-              {showTicketForm && (
-                <CreateTicketPanel
-                  defaultDescription={lastResult.matchedProblem?.nombre ?? ""}
-                  isSubmitting={createTicket.isPending}
-                  error={createTicket.error ? extractErrorMessage(createTicket.error) : null}
-                  onSubmit={handleCreateTicket}
-                  onCancel={() => setShowTicketForm(false)}
-                />
-              )}
-              {createdTicket && <TicketCreatedCard ticket={createdTicket} />}
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-3">
+              {QUICK_ACTIONS.map((label) => (
+                <QuickActionButton key={label} label={label} onClick={() => handleSend(label)} disabled={isBusy} />
+              ))}
+              <span className="ml-auto text-xs text-slate-400">
+                Zona: {zone} ·{" "}
+                <button type="button" onClick={() => setZone(null)} className="text-primary hover:underline">
+                  cambiar
+                </button>
+              </span>
             </div>
-          )}
 
-          <div ref={bottomRef} />
-        </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+              {isLoadingMessages && (
+                <div className="flex justify-center py-6">
+                  <Spinner />
+                </div>
+              )}
 
-        <div className="border-t border-slate-200 bg-white p-4">
-          {sendError && (
-            <div className="mb-2">
-              <ErrorBanner message={sendError} />
+              {!isLoadingMessages && messages.length === 0 && (
+                <div className="flex h-full flex-col items-center justify-center text-center text-slate-400">
+                  <p className="text-sm">Cuéntame qué problema tienes con tu internet.</p>
+                  <p className="text-xs">Puedes usar los botones rápidos de arriba o escribir tu propio mensaje.</p>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3">
+                {messages.map((m) => (
+                  <ChatBubble key={m.id} message={m} />
+                ))}
+                {isBusy && (
+                  <div className="flex justify-start">
+                    <div className="rounded-2xl rounded-bl-sm bg-white px-4 py-2.5 shadow-sm">
+                      <Spinner size="sm" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {lastResult && (
+                <div className="mt-4 flex flex-col gap-3">
+                  <DiagnosticSteps result={lastResult} />
+                  {!createdTicket && !showTicketForm && (
+                    <Button variant="secondary" className="w-fit" onClick={() => setShowTicketForm(true)}>
+                      ¿No se resolvió? Crear ticket de soporte
+                    </Button>
+                  )}
+                  {showTicketForm && (
+                    <CreateTicketPanel
+                      defaultDescription={lastResult.matchedProblem?.nombre ?? ""}
+                      isSubmitting={createTicket.isPending}
+                      error={createTicket.error ? extractErrorMessage(createTicket.error) : null}
+                      onSubmit={handleCreateTicket}
+                      onCancel={() => setShowTicketForm(false)}
+                    />
+                  )}
+                  {createdTicket && <TicketCreatedCard ticket={createdTicket} />}
+                </div>
+              )}
+
+              <div ref={bottomRef} />
             </div>
-          )}
-          <ChatInput onSend={handleSend} disabled={isBusy} />
-        </div>
+
+            <div className="border-t border-slate-200 bg-white p-4">
+              {sendError && (
+                <div className="mb-2">
+                  <ErrorBanner message={sendError} />
+                </div>
+              )}
+              <ChatInput onSend={handleSend} disabled={isBusy} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

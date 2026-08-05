@@ -71,12 +71,26 @@ describe("ChatPage", () => {
   beforeEach(() => {
     sendMessageMock.mockReset();
     createTicketMock.mockReset();
+    localStorage.clear();
+  });
+
+  it("pide la zona antes de mostrar el chat y la recuerda para la próxima vez", async () => {
+    renderChat();
+
+    expect(screen.getByText(/en qué zona te encuentras/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "No tengo internet" })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Centro" }));
+
+    expect(screen.getByRole("button", { name: "No tengo internet" })).toBeInTheDocument();
+    expect(localStorage.getItem("clickia.zone")).toBe("Centro");
   });
 
   it("crea una conversación y muestra la respuesta de IA con el diagnóstico al usar un botón rápido", async () => {
     sendMessageMock.mockResolvedValueOnce(CHAT_RESPONSE);
     renderChat();
 
+    await userEvent.click(screen.getByRole("button", { name: "Centro" }));
     await userEvent.click(screen.getByRole("button", { name: "No tengo internet" }));
 
     expect(sendMessageMock).toHaveBeenCalledWith({
@@ -96,6 +110,7 @@ describe("ChatPage", () => {
     createTicketMock.mockResolvedValueOnce(TICKET);
     renderChat();
 
+    await userEvent.click(screen.getByRole("button", { name: "Centro" }));
     await userEvent.click(screen.getByRole("button", { name: "No tengo internet" }));
     await screen.findByText(/diagnóstico/i);
 
@@ -120,6 +135,7 @@ describe("ChatPage", () => {
     });
     renderChat();
 
+    await userEvent.click(screen.getByRole("button", { name: "Centro" }));
     await userEvent.click(screen.getByRole("button", { name: "WiFi lento" }));
 
     expect(await screen.findByText(/error interno del servidor/i)).toBeInTheDocument();

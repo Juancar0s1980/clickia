@@ -4,16 +4,21 @@ import { NetworkStatusBadge } from "../components/chat/NetworkStatusBadge";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Spinner } from "../components/ui/Spinner";
+import { ZONES } from "../constants/zones";
 import { useAuth } from "../context/AuthContext";
 import { useConversations } from "../hooks/useConversations";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
-
-const ZONES = ["Centro", "Norte", "Sur", "Occidente"];
+import { zoneStorage } from "../services/zoneStorage";
 
 export function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [zone, setZone] = useState(ZONES[0]!);
+  const [zone, setZone] = useState(zoneStorage.get() ?? ZONES[0]);
+
+  function handleZoneChange(newZone: string) {
+    setZone(newZone);
+    zoneStorage.set(newZone);
+  }
 
   const { data: status, isLoading: isStatusLoading } = useNetworkStatus(zone);
   const { data: conversations, isLoading: isConversationsLoading } = useConversations();
@@ -32,7 +37,7 @@ export function DashboardPage() {
           <h2 className="text-sm font-semibold text-slate-700">Estado del servicio</h2>
           <select
             value={zone}
-            onChange={(e) => setZone(e.target.value)}
+            onChange={(e) => handleZoneChange(e.target.value)}
             className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-primary"
           >
             {ZONES.map((z) => (
