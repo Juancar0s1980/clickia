@@ -17,7 +17,7 @@ para la arquitectura completa y el detalle de cada fase.
 - [x] Fase 2 — Base de datos
 - [x] Fase 3 — Backend
 - [x] Fase 4 — Integración IA
-- [ ] Fase 5 — Frontend
+- [x] Fase 5 — Frontend
 - [ ] Fase 6 — Seguridad
 - [ ] Fase 7 — Testing
 - [ ] Fase 8 — Docker y despliegue
@@ -38,5 +38,6 @@ docs/       Documentación técnica
 
 ## Instalación
 
-Ver [backend/README.md](backend/README.md) para instalar y ejecutar la API.
-El frontend se documentará en la Fase 5 y Docker en la Fase 8.
+Ver [backend/README.md](backend/README.md) para instalar y ejecutar la API,
+y [frontend/README.md](frontend/README.md) para la SPA. Docker se
+documentará en la Fase 8.
