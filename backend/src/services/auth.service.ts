@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { env } from "../config/env";
 import { refreshTokenRepository } from "../repositories/refreshToken.repository";
 import { userRepository } from "../repositories/user.repository";
-import { toPublicUser, PublicUser } from "../models/user.model";
+import { toPublicUser, PublicUser, User } from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
 import { signAccessToken } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/password";
@@ -15,12 +15,12 @@ function generateRefreshToken(): string {
   return crypto.randomBytes(48).toString("hex");
 }
 
-async function issueTokens(userId: string, email: string) {
-  const accessToken = signAccessToken({ sub: userId, email });
+async function issueTokens(user: User) {
+  const accessToken = signAccessToken({ sub: user.id, email: user.email, role: user.role });
 
   const refreshToken = generateRefreshToken();
   const expiresAt = new Date(Date.now() + env.refreshTokenExpiresInDays * 24 * 60 * 60 * 1000);
-  await refreshTokenRepository.create(userId, hashToken(refreshToken), expiresAt);
+  await refreshTokenRepository.create(user.id, hashToken(refreshToken), expiresAt);
 
   return { accessToken, refreshToken };
 }
@@ -59,7 +59,7 @@ export const authService = {
       throw ApiError.unauthorized("Credenciales inválidas");
     }
 
-    const tokens = await issueTokens(user.id, user.email);
+    const tokens = await issueTokens(user);
     return { user: toPublicUser(user), ...tokens };
   },
 
@@ -75,7 +75,7 @@ export const authService = {
     }
 
     await refreshTokenRepository.revoke(stored.id);
-    const tokens = await issueTokens(user.id, user.email);
+    const tokens = await issueTokens(user);
     return { user: toPublicUser(user), ...tokens };
   },
 

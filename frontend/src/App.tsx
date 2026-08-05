@@ -1,6 +1,11 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { AdminRoute } from "./components/layout/AdminRoute";
 import { AppShell } from "./components/layout/AppShell";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
+import { AdminConversationDetailPage } from "./pages/admin/AdminConversationDetailPage";
+import { AdminNetworkStatusPage } from "./pages/admin/AdminNetworkStatusPage";
+import { AdminUserConversationsPage } from "./pages/admin/AdminUserConversationsPage";
+import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { ChatPage } from "./pages/ChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -20,6 +25,13 @@ export function App() {
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/chat" element={<ChatPage />} />
+
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminUsersPage />} />
+            <Route path="/admin/users/:userId" element={<AdminUserConversationsPage />} />
+            <Route path="/admin/conversations/:id" element={<AdminConversationDetailPage />} />
+            <Route path="/admin/network-status" element={<AdminNetworkStatusPage />} />
+          </Route>
         </Route>
       </Route>
 

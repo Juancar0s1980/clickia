@@ -1,6 +1,7 @@
 import request from "supertest";
 import { createApp } from "../../src/app";
 import { pool } from "../../src/config/database";
+import { userRepository } from "../../src/repositories/user.repository";
 
 export const app = createApp();
 
@@ -37,4 +38,20 @@ export async function registerAndLogin(prefix = "user"): Promise<RegisteredUser>
     refreshToken: loginRes.body.refreshToken,
     userId: loginRes.body.user.id,
   };
+}
+
+// No hay endpoint HTTP para volverse admin (a proposito: eso se hace con
+// `npm run create-admin`, fuera del flujo publico). Para probar rutas de
+// admin, se promueve directo en la BD y se vuelve a iniciar sesion, porque
+// el rol viaja embebido en el JWT emitido al hacer login.
+export async function registerAndLoginAsAdmin(prefix = "admin"): Promise<RegisteredUser> {
+  const user = await registerAndLogin(prefix);
+  await userRepository.setRole(user.userId, "admin");
+
+  const loginRes = await request(app)
+    .post("/api/auth/login")
+    .send({ email: user.email, password: user.password })
+    .expect(200);
+
+  return { ...user, accessToken: loginRes.body.accessToken, refreshToken: loginRes.body.refreshToken };
 }

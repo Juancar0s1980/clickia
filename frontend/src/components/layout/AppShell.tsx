@@ -9,7 +9,7 @@ const NAV_LINK_CLASS = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export function AppShell() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   return (
     <div className="flex h-screen flex-col">
@@ -22,6 +22,11 @@ export function AppShell() {
           <NavLink to="/chat" className={NAV_LINK_CLASS}>
             Chat
           </NavLink>
+          {isAdmin && (
+            <NavLink to="/admin" className={NAV_LINK_CLASS}>
+              Admin
+            </NavLink>
+          )}
         </nav>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-slate-600 sm:inline">{user?.nombre}</span>

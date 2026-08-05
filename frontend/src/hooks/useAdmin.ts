@@ -1,0 +1,48 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { adminApi } from "../services/adminApi";
+import { NetworkServiceStatus } from "../types/api";
+
+export function useAdminUsers() {
+  return useQuery({ queryKey: ["admin", "users"], queryFn: adminApi.listUsers });
+}
+
+export function useCreateUserByAdmin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: adminApi.createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
+
+export function useAdminUserConversations(userId: string | null) {
+  return useQuery({
+    queryKey: ["admin", "users", userId, "conversations"],
+    queryFn: () => adminApi.getUserConversations(userId!),
+    enabled: userId !== null,
+  });
+}
+
+export function useAdminConversationDetail(conversationId: string | null) {
+  return useQuery({
+    queryKey: ["admin", "conversations", conversationId],
+    queryFn: () => adminApi.getConversationDetail(conversationId!),
+    enabled: conversationId !== null,
+  });
+}
+
+export function useAdminNetworkStatus() {
+  return useQuery({ queryKey: ["admin", "network-status"], queryFn: adminApi.listNetworkStatus });
+}
+
+export function useUpdateNetworkStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { zone: string; status: NetworkServiceStatus; estimatedTime: string | null }) =>
+      adminApi.updateNetworkStatus(input.zone, input.status, input.estimatedTime),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "network-status"] });
+    },
+  });
+}

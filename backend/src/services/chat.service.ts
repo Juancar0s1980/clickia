@@ -24,7 +24,7 @@ export const chatService = {
 
     // Flujo de diagnostico: clasificar -> consultar base de conocimiento -> consultar estado del servicio -> generar respuesta (RAG).
     const match = await knowledgeBaseService.findRelevantProblem(input.message);
-    const networkStatus = networkStatusService.getStatus(input.zone);
+    const networkStatus = await networkStatusService.getStatus(input.zone);
     const aiReply = await generateAiReply(input.message, match, networkStatus);
 
     const aiMessage = await messageRepository.create(conversation.id, "ai", aiReply.text);

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import adminRoutes from "./admin.routes";
 import authRoutes from "./auth.routes";
 import chatRoutes from "./chat.routes";
 import conversationRoutes from "./conversation.routes";
@@ -14,5 +15,6 @@ router.use("/conversations", conversationRoutes);
 router.use("/chat", chatRoutes);
 router.use("/tickets", ticketRoutes);
 router.use("/network", networkRoutes);
+router.use("/admin", adminRoutes);
 
 export default router;

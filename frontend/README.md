@@ -43,6 +43,11 @@ src/
   panel de **diagnóstico visual** (checklist ✓/○ + badge de estado de red)
   después de cada respuesta, y flujo para escalar a ticket sin salir del chat.
 - **Ticket creado**: número, estado y prioridad, inline en la conversación.
+- **Admin** (`/admin`, solo visible/accesible si `user.role === "admin"`,
+  protegido por `AdminRoute`): registrar clientes con su tipo de servicio
+  (Internet/WiFi, TV, o ambos — un `<select>` estándar, no doble-click),
+  listar usuarios, ver las conversaciones de cualquiera, y actualizar el
+  estado de red por zona que consume el chat.
 
 ## Sesión y refresco de token
 

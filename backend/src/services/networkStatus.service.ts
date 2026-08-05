@@ -1,4 +1,7 @@
-export type NetworkServiceStatus = "operativo" | "mantenimiento" | "falla";
+import { networkStatusRepository } from "../repositories/networkStatus.repository";
+import { NetworkServiceStatus, NetworkStatusRow } from "../models/networkStatus.model";
+
+export type { NetworkServiceStatus } from "../models/networkStatus.model";
 
 export interface NetworkStatus {
   zone: string;
@@ -7,13 +10,6 @@ export interface NetworkStatus {
   estimated_time: string | null;
 }
 
-const ZONES: Record<string, NetworkStatus> = {
-  centro: { zone: "Centro", service: "internet", status: "mantenimiento", estimated_time: "30 minutos" },
-  norte: { zone: "Norte", service: "internet", status: "operativo", estimated_time: null },
-  sur: { zone: "Sur", service: "internet", status: "falla", estimated_time: "2 horas" },
-  occidente: { zone: "Occidente", service: "internet", status: "operativo", estimated_time: null },
-};
-
 const DEFAULT_STATUS: NetworkStatus = {
   zone: "Desconocida",
   service: "internet",
@@ -21,14 +17,29 @@ const DEFAULT_STATUS: NetworkStatus = {
   estimated_time: null,
 };
 
-// Simula la API de infraestructura del ISP (GET /api/network/status). El resto
-// del sistema depende solo de esta interfaz, asi que en produccion basta con
-// reemplazar la implementacion por una llamada HTTP real sin tocar consumidores.
+function toNetworkStatus(row: NetworkStatusRow): NetworkStatus {
+  return { zone: row.zone, service: row.service, status: row.status, estimated_time: row.estimated_time };
+}
+
+// API de infraestructura del ISP (GET /api/network/status), respaldada por la tabla
+// network_status en vez de un objeto en memoria: un admin puede actualizarla de verdad
+// (ver controllers/admin.controller.ts) y el chat siempre lee el valor vigente.
 export const networkStatusService = {
-  getStatus(zone?: string): NetworkStatus {
+  async getStatus(zone?: string): Promise<NetworkStatus> {
     if (!zone) {
       return DEFAULT_STATUS;
     }
-    return ZONES[zone.toLowerCase()] ?? { ...DEFAULT_STATUS, zone };
+    const row = await networkStatusRepository.findByZone(zone);
+    return row ? toNetworkStatus(row) : { ...DEFAULT_STATUS, zone };
+  },
+
+  async listAll(): Promise<NetworkStatus[]> {
+    const rows = await networkStatusRepository.findAll();
+    return rows.map(toNetworkStatus);
+  },
+
+  async setStatus(zone: string, status: NetworkServiceStatus, estimatedTime: string | null): Promise<NetworkStatus> {
+    const row = await networkStatusRepository.upsert({ zone, status, estimatedTime });
+    return toNetworkStatus(row);
   },
 };

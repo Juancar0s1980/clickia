@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "migrate": "tsx src/database/migrate.ts",
     "seed": "tsx src/database/migrate.ts --seed",
+    "create-admin": "tsx scripts/createAdmin.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest"
   },

@@ -48,8 +48,35 @@ Todos bajo el prefijo `/api`.
 | POST | `/api/tickets` | Sí | Crea un ticket (escala la conversación si aplica) |
 | GET | `/api/tickets` | Sí | Lista tickets del usuario |
 | GET | `/api/network/status?zone=` | No | API ISP simulada |
+| POST | `/api/admin/users` | Admin | Registra un cliente (con `tipoServicio`) |
+| GET | `/api/admin/users` | Admin | Lista todos los usuarios registrados |
+| GET | `/api/admin/users/:userId/conversations` | Admin | Conversaciones de cualquier usuario |
+| GET | `/api/admin/conversations/:id` | Admin | Detalle de cualquier conversación |
+| GET | `/api/admin/network-status` | Admin | Lista el estado de todas las zonas |
+| PATCH | `/api/admin/network-status/:zone` | Admin | Actualiza estado/tiempo estimado de una zona |
 
 Auth: header `Authorization: Bearer <accessToken>`.
+
+## Rol admin
+
+`users.role` (`user` \| `admin`) viaja embebido en el JWT emitido al hacer
+login — un cambio de rol solo toma efecto en la siguiente sesión del
+usuario. No existe un endpoint público para crear administradores: se
+bootstrapea con un script que lee las credenciales de variables de entorno
+(nunca del código):
+
+```bash
+ADMIN_EMAIL=admin@tuempresa.com ADMIN_PASSWORD=... ADMIN_NOMBRE="Admin" \
+  npm run create-admin
+```
+
+Es idempotente: si el correo ya existe, promueve esa cuenta a admin en vez
+de fallar.
+
+El estado de red (`network_status`, antes un objeto fijo en el código) es
+ahora una tabla real que el admin actualiza vía `PATCH
+/admin/network-status/:zone`; `GET /api/network/status` —y por lo tanto el
+RAG del chat— siempre lee el valor vigente.
 
 ## Integración de IA (Fase 4)
 

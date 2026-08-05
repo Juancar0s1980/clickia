@@ -1,9 +1,14 @@
+export type UserRole = "user" | "admin";
+export type TipoServicio = "wifi" | "tv" | "wifi_tv";
+
 export interface User {
   id: string;
   nombre: string;
   email: string;
   password_hash: string;
   telefono: string | null;
+  role: UserRole;
+  tipo_servicio: TipoServicio;
   activo: boolean;
   fecha_creacion: Date;
   updated_at: Date;
