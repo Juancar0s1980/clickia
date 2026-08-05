@@ -16,7 +16,7 @@ para la arquitectura completa y el detalle de cada fase.
 - [x] Fase 1 — Arquitectura y diseño
 - [x] Fase 2 — Base de datos
 - [x] Fase 3 — Backend
-- [ ] Fase 4 — Integración IA
+- [x] Fase 4 — Integración IA
 - [ ] Fase 5 — Frontend
 - [ ] Fase 6 — Seguridad
 - [ ] Fase 7 — Testing

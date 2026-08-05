@@ -17,4 +17,5 @@ export const env = {
   refreshTokenExpiresInDays: Number(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS ?? 30),
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
 };

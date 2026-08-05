@@ -1,9 +1,9 @@
 import { conversationRepository } from "../repositories/conversation.repository";
 import { messageRepository } from "../repositories/message.repository";
 import { ApiError } from "../utils/ApiError";
+import { generateAiReply } from "./ai/aiReply.service";
 import { knowledgeBaseService } from "./knowledgeBase.service";
 import { networkStatusService } from "./networkStatus.service";
-import { buildDiagnosticReply } from "./replyComposer";
 
 export const chatService = {
   async sendMessage(input: {
@@ -22,18 +22,19 @@ export const chatService = {
 
     await messageRepository.create(conversation.id, "user", input.message);
 
-    // Flujo de diagnostico: clasificar -> consultar base de conocimiento -> consultar estado del servicio -> responder.
+    // Flujo de diagnostico: clasificar -> consultar base de conocimiento -> consultar estado del servicio -> generar respuesta (RAG).
     const match = await knowledgeBaseService.findRelevantProblem(input.message);
     const networkStatus = networkStatusService.getStatus(input.zone);
-    const replyText = buildDiagnosticReply(match, networkStatus);
+    const aiReply = await generateAiReply(input.message, match, networkStatus);
 
-    const aiMessage = await messageRepository.create(conversation.id, "ai", replyText);
+    const aiMessage = await messageRepository.create(conversation.id, "ai", aiReply.text);
 
     return {
       conversation,
       reply: aiMessage,
       matchedProblem: match?.problem ?? null,
       networkStatus,
+      source: aiReply.source,
     };
   },
 };
