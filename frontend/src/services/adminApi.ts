@@ -15,6 +15,19 @@ export interface TopProblem {
   total: number;
 }
 
+export interface BulkCreateUsersResult {
+  created: User[];
+  errors: Array<{ row: number; email: string; error: string }>;
+}
+
+export interface BulkUserRow {
+  nombre: string;
+  email: string;
+  password: string;
+  telefono?: string;
+  tipoServicio: TipoServicio;
+}
+
 export const adminApi = {
   async createUser(input: {
     nombre: string;
@@ -59,6 +72,11 @@ export const adminApi = {
       estimatedTime,
     });
     return data.status;
+  },
+
+  async bulkCreateUsers(rows: BulkUserRow[]): Promise<BulkCreateUsersResult> {
+    const { data } = await httpClient.post<BulkCreateUsersResult>("/admin/users/bulk", { rows });
+    return data;
   },
 
   async getSummary(): Promise<AdminSummary> {

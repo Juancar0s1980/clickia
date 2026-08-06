@@ -18,12 +18,12 @@ export function NetworkStatusRow({ status, isSaving, onSave }: NetworkStatusRowP
 
   return (
     <tr>
-      <td className="px-4 py-3 font-medium text-slate-700">{status.zone}</td>
+      <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{status.zone}</td>
       <td className="px-4 py-3">
         <select
           value={value}
           onChange={(e) => setValue(e.target.value as NetworkServiceStatus)}
-          className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-primary"
+          className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:border-primary dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
         >
           {STATUS_OPTIONS.map((s) => (
             <option key={s} value={s}>
@@ -37,7 +37,7 @@ export function NetworkStatusRow({ status, isSaving, onSave }: NetworkStatusRowP
           value={estimatedTime}
           onChange={(e) => setEstimatedTime(e.target.value)}
           placeholder="ej. 30 minutos"
-          className="w-40 rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-primary"
+          className="w-40 rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:border-primary dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
         />
       </td>
       <td className="px-4 py-3">

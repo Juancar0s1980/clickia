@@ -13,8 +13,10 @@ export function AdminNetworkStatusPage() {
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-4 overflow-y-auto p-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-800">Estado de red por zona</h1>
-        <p className="text-sm text-slate-500">Esto es lo que el chatbot consulta antes de diagnosticar un problema.</p>
+        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Estado de red por zona</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Esto es lo que el chatbot consulta antes de diagnosticar un problema.
+        </p>
       </div>
 
       {updateStatus.error && <ErrorBanner message={extractErrorMessage(updateStatus.error)} />}
@@ -26,7 +28,7 @@ export function AdminNetworkStatusPage() {
           </div>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
+            <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-700 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-3">Zona</th>
                 <th className="px-4 py-3">Estado</th>
@@ -34,7 +36,7 @@ export function AdminNetworkStatusPage() {
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
               {(statuses ?? []).map((s) => (
                 <NetworkStatusRow
                   key={s.zone}

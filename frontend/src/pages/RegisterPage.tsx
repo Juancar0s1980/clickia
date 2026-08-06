@@ -7,6 +7,7 @@ import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { Input } from "../components/ui/Input";
 import { Logo } from "../components/ui/Logo";
+import { ThemeToggle } from "../components/ui/ThemeToggle";
 import { authApi } from "../services/authApi";
 import { extractErrorMessage } from "../services/httpClient";
 
@@ -42,13 +43,21 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-slate-900 px-4">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+
+      <div className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-xl dark:border-slate-700 dark:bg-slate-800">
         <div className="mb-6 flex justify-center">
           <Logo />
         </div>
-        <h1 className="mb-1 text-center text-lg font-semibold text-slate-800">Crear cuenta</h1>
-        <p className="mb-6 text-center text-sm text-slate-500">Regístrate para acceder al soporte inteligente</p>
+        <h1 className="mb-1 text-center text-lg font-semibold text-slate-800 dark:text-slate-100">Crear cuenta</h1>
+        <p className="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          Regístrate para acceder al soporte inteligente
+        </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input label="Nombre completo" autoComplete="name" error={errors.nombre?.message} {...register("nombre")} />
@@ -64,7 +73,7 @@ export function RegisterPage() {
 
           {serverError && <ErrorBanner message={serverError} />}
           {success && (
-            <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+            <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-300">
               Cuenta creada. Redirigiendo a inicio de sesión…
             </p>
           )}
@@ -74,9 +83,9 @@ export function RegisterPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm">
+        <p className="mt-4 text-center text-sm text-slate-600 dark:text-slate-400">
           ¿Ya tienes cuenta?{" "}
-          <Link to="/login" className="text-primary hover:underline">
+          <Link to="/login" className="text-primary hover:underline dark:text-blue-300">
             Inicia sesión
           </Link>
         </p>

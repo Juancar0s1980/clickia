@@ -9,7 +9,14 @@ import { useAuth } from "../context/AuthContext";
 import { useConversations } from "../hooks/useConversations";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { zoneStorage } from "../services/zoneStorage";
+import { TipoServicio } from "../types/api";
 import { AdminStatsPage } from "./admin/AdminStatsPage";
+
+const SERVICE_LABELS: Record<TipoServicio, string> = {
+  wifi: "Internet / WiFi",
+  tv: "TV",
+  wifi_tv: "Internet + TV",
+};
 
 export function DashboardPage() {
   const { user, isAdmin } = useAuth();
@@ -35,18 +42,23 @@ export function DashboardPage() {
 
   return (
     <div className="mx-auto flex h-full max-w-5xl flex-col gap-6 overflow-y-auto p-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-800">Hola, {user?.nombre?.split(" ")[0]}</h1>
-        <p className="text-sm text-slate-500">Este es el estado de tu servicio y tus consultas recientes.</p>
+      <div className="rounded-2xl bg-gradient-to-r from-primary to-primary-dark p-6 text-white shadow-sm">
+        <h1 className="text-xl font-semibold">Hola, {user?.nombre?.split(" ")[0]}</h1>
+        <p className="text-sm text-blue-100">Este es el estado de tu servicio y tus consultas recientes.</p>
+        {user && (
+          <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-medium">
+            Tu plan: {SERVICE_LABELS[user.tipo_servicio]}
+          </span>
+        )}
       </div>
 
       <Card className="p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">Estado del servicio</h2>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Estado del servicio</h2>
           <select
             value={zone}
             onChange={(e) => handleZoneChange(e.target.value)}
-            className="rounded-lg border border-slate-300 px-2 py-1 text-sm outline-none focus:border-primary"
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:border-primary dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
           >
             {ZONES.map((z) => (
               <option key={z} value={z}>
@@ -60,7 +72,7 @@ export function DashboardPage() {
 
       <Card className="p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">Conversaciones recientes</h2>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Conversaciones recientes</h2>
           <Button variant="accent" onClick={() => navigate("/chat")}>
             + Nueva consulta
           </Button>
@@ -68,19 +80,19 @@ export function DashboardPage() {
 
         {isConversationsLoading && <Spinner size="sm" />}
         {!isConversationsLoading && recent.length === 0 && (
-          <p className="text-sm text-slate-400">Aún no tienes conversaciones. Crea la primera.</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">Aún no tienes conversaciones. Crea la primera.</p>
         )}
-        <ul className="flex flex-col divide-y divide-slate-100">
+        <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700">
           {recent.map((c) => (
             <li key={c.id}>
               <button
                 onClick={() => navigate("/chat", { state: { conversationId: c.id } })}
-                className="flex w-full items-center justify-between py-3 text-left text-sm hover:text-primary"
+                className="flex w-full items-center justify-between py-3 text-left text-sm text-slate-700 hover:text-primary dark:text-slate-300"
               >
                 <span>
                   {new Date(c.fecha_inicio).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" })}
                 </span>
-                <span className="text-xs capitalize text-slate-500">{c.estado}</span>
+                <span className="text-xs capitalize text-slate-500 dark:text-slate-400">{c.estado}</span>
               </button>
             </li>
           ))}

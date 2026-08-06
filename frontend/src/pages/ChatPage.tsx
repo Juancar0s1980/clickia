@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { ChangePasswordModal } from "../components/account/ChangePasswordModal";
 import { ChatBubble } from "../components/chat/ChatBubble";
 import { ChatInput } from "../components/chat/ChatInput";
 import { ConversationSidebar } from "../components/chat/ConversationSidebar";
@@ -19,7 +20,7 @@ import { extractErrorMessage } from "../services/httpClient";
 import { zoneStorage } from "../services/zoneStorage";
 import { ChatResponse, Message, Ticket } from "../types/api";
 
-const QUICK_ACTIONS = ["No tengo internet", "WiFi lento", "Router con luz roja"];
+const QUICK_ACTIONS = ["No tengo internet", "WiFi lento", "Mejorar mi plan"];
 
 export function ChatPage() {
   const { isAdmin } = useAuth();
@@ -33,6 +34,7 @@ export function ChatPage() {
   const [showTicketForm, setShowTicketForm] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<Ticket | null>(null);
   const [zone, setZone] = useState<string | null>(() => zoneStorage.get());
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   function selectZone(newZone: string) {
@@ -152,9 +154,9 @@ export function ChatPage() {
       <div className="flex min-w-0 flex-1 flex-col">
         {zone === null ? (
           <div className="flex flex-1 items-center justify-center p-6">
-            <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-              <p className="mb-1 text-sm font-semibold text-slate-700">¿En qué zona te encuentras?</p>
-              <p className="mb-4 text-xs text-slate-500">
+            <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <p className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">¿En qué zona te encuentras?</p>
+              <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
                 Lo necesitamos para revisar el estado del servicio en tu área antes de diagnosticar tu problema.
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -168,13 +170,20 @@ export function ChatPage() {
           </div>
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
               {QUICK_ACTIONS.map((label) => (
                 <QuickActionButton key={label} label={label} onClick={() => handleSend(label)} disabled={isBusy} />
               ))}
-              <span className="ml-auto text-xs text-slate-400">
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(true)}
+                className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                Cambiar contraseña
+              </button>
+              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">
                 Zona: {zone} ·{" "}
-                <button type="button" onClick={() => setZone(null)} className="text-primary hover:underline">
+                <button type="button" onClick={() => setZone(null)} className="text-primary hover:underline dark:text-blue-300">
                   cambiar
                 </button>
               </span>
@@ -188,7 +197,7 @@ export function ChatPage() {
               )}
 
               {!isLoadingMessages && messages.length === 0 && (
-                <div className="flex h-full flex-col items-center justify-center text-center text-slate-400">
+                <div className="flex h-full flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500">
                   <p className="text-sm">Cuéntame qué problema tienes con tu internet.</p>
                   <p className="text-xs">Puedes usar los botones rápidos de arriba o escribir tu propio mensaje.</p>
                 </div>
@@ -200,7 +209,7 @@ export function ChatPage() {
                 ))}
                 {isBusy && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl rounded-bl-sm bg-white px-4 py-2.5 shadow-sm">
+                    <div className="rounded-2xl rounded-bl-sm bg-white px-4 py-2.5 shadow-sm dark:bg-slate-700">
                       <Spinner size="sm" />
                     </div>
                   </div>
@@ -231,7 +240,7 @@ export function ChatPage() {
               <div ref={bottomRef} />
             </div>
 
-            <div className="border-t border-slate-200 bg-white p-4">
+            <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
               {sendError && (
                 <div className="mb-2">
                   <ErrorBanner message={sendError} />
@@ -242,6 +251,8 @@ export function ChatPage() {
           </>
         )}
       </div>
+
+      {showPasswordModal && <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />}
     </div>
   );
 }

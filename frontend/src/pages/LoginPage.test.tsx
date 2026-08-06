@@ -10,6 +10,10 @@ vi.mock("../context/AuthContext", () => ({
   useAuth: () => ({ login: loginMock, isAuthenticated: false }),
 }));
 
+vi.mock("../context/ThemeContext", () => ({
+  useTheme: () => ({ theme: "light", toggleTheme: vi.fn() }),
+}));
+
 function renderLogin() {
   return render(
     <MemoryRouter>

@@ -22,6 +22,7 @@ const EXISTING_USER: User = {
 vi.mock("../../hooks/useAdmin", () => ({
   useAdminUsers: () => ({ data: [EXISTING_USER], isLoading: false }),
   useCreateUserByAdmin: () => ({ mutateAsync: createUserMock, isPending: false, error: null }),
+  useBulkCreateUsers: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 function renderPage() {

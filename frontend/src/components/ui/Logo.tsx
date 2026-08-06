@@ -4,7 +4,7 @@ export function Logo({ className = "" }: { className?: string }) {
       <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-lg font-bold text-white">
         C
       </span>
-      <span className="text-lg font-semibold text-primary-dark">ClickIA</span>
+      <span className="text-lg font-semibold text-primary-dark dark:text-blue-300">ClickIA</span>
     </div>
   );
 }

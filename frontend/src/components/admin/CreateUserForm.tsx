@@ -37,8 +37,8 @@ export function CreateUserForm({ isSubmitting, error, onSubmit, onCancel }: Crea
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { tipoServicio: "wifi" } });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5">
-      <p className="text-sm font-semibold text-slate-700">Registrar usuario</p>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Registrar usuario</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input label="Nombre completo" error={errors.nombre?.message} {...register("nombre")} />
@@ -48,13 +48,13 @@ export function CreateUserForm({ isSubmitting, error, onSubmit, onCancel }: Crea
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="tipoServicio" className="text-sm font-medium text-slate-700">
+        <label htmlFor="tipoServicio" className="text-sm font-medium text-slate-700 dark:text-slate-300">
           Tipo de servicio contratado
         </label>
         <select
           id="tipoServicio"
           {...register("tipoServicio")}
-          className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
+          className="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
         >
           {(Object.keys(SERVICE_LABELS) as TipoServicio[]).map((value) => (
             <option key={value} value={value}>

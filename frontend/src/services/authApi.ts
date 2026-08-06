@@ -21,4 +21,8 @@ export const authApi = {
   async logout(refreshToken: string): Promise<void> {
     await httpClient.post("/auth/logout", { refreshToken });
   },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await httpClient.patch("/users/me/password", { currentPassword, newPassword });
+  },
 };

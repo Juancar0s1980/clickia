@@ -16,6 +16,16 @@ export function useCreateUserByAdmin() {
   });
 }
 
+export function useBulkCreateUsers() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: adminApi.bulkCreateUsers,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
+
 export function useAdminUserConversations(userId: string | null) {
   return useQuery({
     queryKey: ["admin", "users", userId, "conversations"],

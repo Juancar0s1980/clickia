@@ -10,9 +10,9 @@ export function AdminStatsPage() {
 
   return (
     <div className="mx-auto flex h-full max-w-4xl flex-col gap-6 overflow-y-auto p-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-800">Panel de administración</h1>
-        <p className="text-sm text-slate-500">Resumen general y fallas más recurrentes reportadas en el chat.</p>
+      <div className="rounded-2xl bg-gradient-to-r from-primary to-primary-dark p-6 text-white shadow-sm">
+        <h1 className="text-xl font-semibold">Panel de administración</h1>
+        <p className="text-sm text-blue-100">Resumen general y fallas más recurrentes reportadas en el chat.</p>
       </div>
 
       {isSummaryLoading || !summary ? (
@@ -27,10 +27,12 @@ export function AdminStatsPage() {
       )}
 
       <Card className="p-5">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Fallas más recurrentes</h2>
+        <h2 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">Fallas más recurrentes</h2>
         {isProblemsLoading && <Spinner size="sm" />}
         {!isProblemsLoading && (topProblems ?? []).length === 0 && (
-          <p className="text-sm text-slate-400">Todavía no hay suficientes conversaciones para mostrar datos.</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">
+            Todavía no hay suficientes conversaciones para mostrar datos.
+          </p>
         )}
         {!isProblemsLoading && (topProblems ?? []).length > 0 && (
           <BarChart items={(topProblems ?? []).map((p) => ({ label: p.nombre, value: p.total }))} />
