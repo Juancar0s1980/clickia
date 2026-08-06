@@ -11,6 +11,7 @@ import { ChatPage } from "./pages/ChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
+import { MyTicketsPage } from "./pages/MyTicketsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PlansPage } from "./pages/PlansPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -28,6 +29,7 @@ export function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/planes" element={<PlansPage />} />
+          <Route path="/tickets" element={<MyTicketsPage />} />
 
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminUsersPage />} />

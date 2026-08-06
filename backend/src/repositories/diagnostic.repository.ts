@@ -7,12 +7,28 @@ export const diagnosticRepository = {
     problemId: string | null;
     zone: string | null;
     networkStatus: string | null;
+    weatherDescription?: string | null;
+    weatherIsSevere?: boolean | null;
+    ispName?: string | null;
+    ispCity?: string | null;
   }): Promise<Diagnostic> {
     const { rows } = await pool.query<Diagnostic>(
-      `INSERT INTO diagnostics (conversation_id, problem_id, zone, network_status)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO diagnostics (
+         conversation_id, problem_id, zone, network_status,
+         weather_description, weather_is_severe, isp_name, isp_city
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [input.conversationId, input.problemId, input.zone, input.networkStatus],
+      [
+        input.conversationId,
+        input.problemId,
+        input.zone,
+        input.networkStatus,
+        input.weatherDescription ?? null,
+        input.weatherIsSevere ?? null,
+        input.ispName ?? null,
+        input.ispCity ?? null,
+      ],
     );
     return rows[0]!;
   },

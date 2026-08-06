@@ -72,7 +72,8 @@ export function useAdminTickets() {
 export function useUpdateTicketStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { id: string; estado: TicketEstado }) => adminApi.updateTicketStatus(input.id, input.estado),
+    mutationFn: (input: { id: string; estado: TicketEstado; respuesta?: string }) =>
+      adminApi.updateTicketStatus(input.id, input.estado, input.respuesta),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "tickets"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "stats", "summary"] });

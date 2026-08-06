@@ -23,4 +23,5 @@ export const bulkCreateUsersSchema = z.object({
 
 export const updateTicketStatusSchema = z.object({
   estado: z.enum(["abierto", "en_proceso", "resuelto", "cerrado"]),
+  respuesta: z.string().trim().min(1, "La respuesta no puede estar vacía").max(2000).optional(),
 });

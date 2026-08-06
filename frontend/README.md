@@ -55,6 +55,30 @@ src/
   soporte (no es cliente del ISP): el link se oculta y `/chat` redirige a
   `/dashboard` si se navega ahí directo.
 
+## Pantallas agregadas después de la Fase 5
+
+- **Registro**: además de nombre/correo/contraseña/dirección/teléfono,
+  incluye el checkbox obligatorio de **consentimiento de almacenamiento de
+  datos** (bloquea el envío si no se acepta) y un botón de ojo para
+  mostrar/ocultar la contraseña (`Input.tsx`, aplica a cualquier campo
+  `type="password"` de la app).
+- **Panel del cliente**: rediseñado en dos columnas (saludo + estado del
+  servicio/clima a la derecha) y con el historial de conversaciones como
+  contenido principal, con badge de color por estado. "Mis tickets" se
+  movió a su propia página.
+- **Mis tickets** (`/tickets`, solo clientes): lista completa de los
+  tickets propios con la respuesta del equipo de soporte cuando ya existe.
+- **Planes** (`/planes`): catálogo de planes de DobleClick en tarjetas,
+  con la misma paleta de marca; el chat también responde preguntas de
+  precio con estos mismos datos.
+- **Admin → Tickets**: tabla compacta + modal "Atender ticket" (como el de
+  cambiar contraseña) para escribir una respuesta y cambiar el estado en un
+  solo envío, en vez de una fila expandible dentro de la tabla.
+- **Logo**: ícono de marca real (`assets/logo-icon.png`, con fondo
+  transparente) en vez del cuadro con "C"; el texto "ClickIA" se mantiene
+  como texto real (no parte de la imagen) para que sea legible en modo
+  oscuro. Favicon del navegador también actualizado (`public/favicon.png`).
+
 ## Sesión y refresco de token
 
 `services/httpClient.ts` adjunta el access token a cada request y, ante un
@@ -91,6 +115,11 @@ npm test
   conversación y muestra la respuesta de IA junto al panel de diagnóstico;
   crear un ticket desde ese diagnóstico muestra el número de ticket; un
   fallo al enviar el mensaje muestra el error sin romper el chat.
+- `AdminUsersPage.test.tsx`: lista usuarios existentes y registra uno
+  nuevo con su tipo de servicio.
+- `AdminTicketsPage.test.tsx`: lista tickets con su estado y si ya tienen
+  respuesta; el modal "Atender" envía la respuesta + el nuevo estado en un
+  solo submit.
 
 jsdom no implementa `Element.scrollIntoView` (lo usa `ChatPage` para
 desplazar al último mensaje); se poliféna en `src/test/setup.ts`, junto con

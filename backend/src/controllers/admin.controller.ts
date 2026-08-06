@@ -59,7 +59,7 @@ export const adminController = {
   }),
 
   updateTicketStatus: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const ticket = await adminService.updateTicketStatus(req.params.id!, req.body.estado);
+    const ticket = await adminService.updateTicketStatus(req.params.id!, req.body.estado, req.body.respuesta);
     res.status(200).json({ ticket });
   }),
 };

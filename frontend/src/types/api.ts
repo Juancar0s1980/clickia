@@ -7,6 +7,8 @@ export interface User {
   email: string;
   telefono: string | null;
   direccion: string;
+  acepto_datos: boolean;
+  acepto_datos_at: string | null;
   role: UserRole;
   tipo_servicio: TipoServicio;
   activo: boolean;
@@ -64,6 +66,8 @@ export interface Ticket {
   descripcion: string;
   prioridad: TicketPrioridad;
   estado: TicketEstado;
+  respuesta: string | null;
+  fecha_respuesta: string | null;
   fecha_creacion: string;
   updated_at: string;
 }

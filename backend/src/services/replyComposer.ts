@@ -1,4 +1,5 @@
 import { KnowledgeMatch } from "./knowledgeBase.service";
+import { IspInfo } from "./ipLookup.service";
 import { NetworkStatus } from "./networkStatus.service";
 import { WeatherSnapshot } from "./weather.service";
 import { Message } from "../models/message.model";
@@ -37,6 +38,7 @@ export function buildDiagnosticReply(
   plans: Plan[] | null = null,
   history: Message[] = [],
   weather: WeatherSnapshot | null = null,
+  ispInfo: IspInfo | null = null,
 ): string {
   const statusLine =
     networkStatus.status === "operativo"
@@ -50,6 +52,14 @@ export function buildDiagnosticReply(
   const weatherLine =
     weather?.isSevere && match
       ? `También noto que hay ${weather.description} en tu zona ahora mismo; esto puede estar afectando la señal.`
+      : null;
+
+  // Si la conexion actual del cliente no parece ser la de DobleClick (ej. escribe desde
+  // datos moviles mientras reporta su internet de casa caido), es una pista real: desde el
+  // servidor no se puede confirmar nada de esa otra red.
+  const ispLine =
+    ispInfo && match
+      ? `Detecto que en este momento estás conectado a través de "${ispInfo.isp}". Si no corresponde a tu servicio de DobleClick, es posible que estés usando otra red (por ejemplo datos móviles) mientras reportas el problema.`
       : null;
 
   if (!match) {
@@ -83,6 +93,7 @@ export function buildDiagnosticReply(
   // ayuda, así que se reconoce que no funcionaron y se ofrece escalar a un ticket.
   if (alreadyGaveStepsFor(history, match.problem.nombre)) {
     const parts = [`Veo que ya te compartí los pasos para "${match.problem.nombre}" y el problema sigue presente.`, TICKET_NUDGE];
+    if (ispLine) parts.unshift(ispLine);
     if (weatherLine) parts.unshift(weatherLine);
     if (statusLine) parts.unshift(statusLine);
     if (plans && plans.length > 0) parts.push(buildPlansBlock(plans));
@@ -100,6 +111,7 @@ export function buildDiagnosticReply(
   ];
   if (statusLine) parts.push(statusLine);
   if (weatherLine) parts.push(weatherLine);
+  if (ispLine) parts.push(ispLine);
   if (stepsText) parts.push(`Pasos recomendados:\n${stepsText}`);
   if (recomendaciones.length > 0) parts.push(recomendaciones.join(" "));
   if (plans && plans.length > 0) parts.push(buildPlansBlock(plans));

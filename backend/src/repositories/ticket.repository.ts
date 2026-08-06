@@ -40,10 +40,18 @@ export const ticketRepository = {
     return rows;
   },
 
-  async updateEstado(id: string, estado: TicketEstado): Promise<Ticket | null> {
+  // El admin puede cambiar solo el estado, o cambiarlo junto con una respuesta escrita
+  // para el cliente. Si respuesta es undefined, se deja intacta la que ya hubiera.
+  async respond(id: string, estado: TicketEstado, respuesta?: string): Promise<Ticket | null> {
     const { rows } = await pool.query<Ticket>(
-      `UPDATE tickets SET estado = $1, updated_at = now() WHERE id = $2 RETURNING *`,
-      [estado, id],
+      `UPDATE tickets
+       SET estado = $1,
+           respuesta = COALESCE($2, respuesta),
+           fecha_respuesta = CASE WHEN $2 IS NOT NULL THEN now() ELSE fecha_respuesta END,
+           updated_at = now()
+       WHERE id = $3
+       RETURNING *`,
+      [estado, respuesta ?? null, id],
     );
     return rows[0] ?? null;
   },

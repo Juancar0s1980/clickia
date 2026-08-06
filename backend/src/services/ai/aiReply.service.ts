@@ -1,4 +1,5 @@
 import { KnowledgeMatch } from "../knowledgeBase.service";
+import { IspInfo } from "../ipLookup.service";
 import { NetworkStatus } from "../networkStatus.service";
 import { WeatherSnapshot } from "../weather.service";
 import { Message } from "../../models/message.model";
@@ -13,8 +14,8 @@ export interface AiReplyResult {
 }
 
 // Orquesta la generacion: RAG (contexto ya recuperado por knowledgeBase + networkStatus + plan.service
-// + weather.service, mas el historial de la conversacion) -> LLM. Si no hay proveedor configurado o
-// la llamada falla, degrada a la plantilla deterministica en vez de romper el chat.
+// + weather.service + ipLookup.service, mas el historial de la conversacion) -> LLM. Si no hay proveedor
+// configurado o la llamada falla, degrada a la plantilla deterministica en vez de romper el chat.
 export async function generateAiReply(
   userMessage: string,
   match: KnowledgeMatch | null,
@@ -22,16 +23,20 @@ export async function generateAiReply(
   plans: Plan[] | null = null,
   history: Message[] = [],
   weather: WeatherSnapshot | null = null,
+  ispInfo: IspInfo | null = null,
 ): Promise<AiReplyResult> {
   const provider = resolveAiProvider();
 
   if (provider) {
-    const prompt = buildUserPrompt(userMessage, match, networkStatus, plans, history, weather);
+    const prompt = buildUserPrompt(userMessage, match, networkStatus, plans, history, weather, ispInfo);
     const text = await provider.generateReply(SYSTEM_INSTRUCTION, prompt);
     if (text) {
       return { text, source: provider.name };
     }
   }
 
-  return { text: buildDiagnosticReply(match, networkStatus, plans, history, weather), source: "fallback_template" };
+  return {
+    text: buildDiagnosticReply(match, networkStatus, plans, history, weather, ispInfo),
+    source: "fallback_template",
+  };
 }

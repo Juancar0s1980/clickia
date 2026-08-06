@@ -60,7 +60,8 @@ flowchart LR
 | Estado remoto | React Query + Axios | Cache, reintentos y estados de carga/error sin boilerplate manual |
 | Backend | Node.js + Express + TypeScript | Mismo lenguaje que el frontend, tipado compartido, ecosistema npm para JWT/bcrypt/rate-limit |
 | Base de datos | PostgreSQL | Relacional, transaccional, ideal para el modelo users→conversations→messages→tickets |
-| IA | Gemini API (RAG) | API gratuita/económica con buen soporte de contexto largo; arquitectura desacoplada para poder cambiar a OpenAI/Ollama sin tocar el resto del sistema |
+| IA | Groq / Gemini (RAG), intercambiables | `AiProvider` es una interfaz; ambos clientes la implementan y se autodetecta cuál usar según qué API key esté configurada — se cambió de Gemini a Groq en producción sin tocar el resto del sistema cuando se agotaron los créditos de Gemini |
+| APIs externas 2 y 3 | Open-Meteo (clima) + ip-api.com (ISP por IP) | Ninguna requiere API key; ambas se usan como señales reales de diagnóstico (clima severo / red distinta a la contratada), no como llamadas aisladas, y sus datos se persisten en `diagnostics` |
 | Auth | JWT + refresh tokens + bcrypt | Estándar stateless para APIs REST, escalable horizontalmente |
 | Docs API | OpenAPI/Swagger | Contrato explícito entre frontend y backend, generable desde el código |
 | Contenedores | Docker + docker-compose | Entorno reproducible (frontend, backend, postgres) igual en dev y despliegue |
@@ -132,12 +133,18 @@ sin tocar controllers.
 Convención de commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
 `chore:` (Conventional Commits).
 
-## 6. Próximas fases
+## 6. Estado de las fases
 
-- **Fase 2:** modelo de datos PostgreSQL + ERD + migraciones.
-- **Fase 3:** backend (capas, endpoints REST, API ISP simulada).
-- **Fase 4:** integración IA (RAG con Gemini).
-- **Fase 5:** frontend (chat, login, dashboard).
-- **Fase 6:** seguridad (JWT, AI Guard, hardening).
-- **Fase 7:** testing (Jest/Supertest, React Testing Library).
-- **Fase 8:** Docker y despliegue.
+- **Fase 1:** arquitectura y diseño. ✅
+- **Fase 2:** modelo de datos PostgreSQL + ERD + migraciones. ✅
+- **Fase 3:** backend (capas, endpoints REST, API ISP simulada). ✅
+- **Fase 4:** integración IA (RAG con LLM intercambiable). ✅
+- **Fase 5:** frontend (chat, login, dashboard). ✅
+- **Fase 6:** seguridad (JWT, AI Guard, hardening). ✅
+- **Fase 7:** testing (Jest/Supertest, React Testing Library). ✅
+- **Fase 8:** Docker y despliegue con URL pública. ⏳ en curso.
+
+Ver [../README.md](../README.md) y [../backend/README.md](../backend/README.md)
+para el detalle de todo lo agregado después de la Fase 7 (planes, clima,
+ISP, memoria de conversación, filtro de temas, tickets con respuesta,
+consentimiento de datos).

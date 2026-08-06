@@ -6,6 +6,9 @@ export const registerSchema = z.object({
   password: z.string().min(8).max(72),
   direccion: z.string().trim().min(5, "Ingresa la dirección de instalación").max(200),
   telefono: z.string().trim().max(30).optional(),
+  aceptoDatos: z.boolean().refine((v) => v === true, {
+    message: "Debes aceptar el almacenamiento de tus datos y conversaciones para continuar",
+  }),
 });
 
 export const loginSchema = z.object({

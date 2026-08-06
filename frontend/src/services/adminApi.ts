@@ -105,8 +105,8 @@ export const adminApi = {
     return data.tickets;
   },
 
-  async updateTicketStatus(id: string, estado: TicketEstado): Promise<TicketWithUser> {
-    const { data } = await httpClient.patch<{ ticket: TicketWithUser }>(`/admin/tickets/${id}`, { estado });
+  async updateTicketStatus(id: string, estado: TicketEstado, respuesta?: string): Promise<TicketWithUser> {
+    const { data } = await httpClient.patch<{ ticket: TicketWithUser }>(`/admin/tickets/${id}`, { estado, respuesta });
     return data.ticket;
   },
 };

@@ -129,8 +129,8 @@ export const adminService = {
     return ticketRepository.findAllWithUser();
   },
 
-  async updateTicketStatus(ticketId: string, estado: TicketEstado) {
-    const ticket = await ticketRepository.updateEstado(ticketId, estado);
+  async updateTicketStatus(ticketId: string, estado: TicketEstado, respuesta?: string) {
+    const ticket = await ticketRepository.respond(ticketId, estado, respuesta);
     if (!ticket) {
       throw ApiError.notFound("Ticket no encontrado");
     }

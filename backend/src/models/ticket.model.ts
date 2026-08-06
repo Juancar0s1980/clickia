@@ -9,6 +9,8 @@ export interface Ticket {
   descripcion: string;
   prioridad: TicketPrioridad;
   estado: TicketEstado;
+  respuesta: string | null;
+  fecha_respuesta: Date | null;
   fecha_creacion: Date;
   updated_at: Date;
 }

@@ -36,6 +36,12 @@ function scoreProblem(problem: TechnicalProblem, wordSet: Set<string>): number {
   return score;
 }
 
+// Una sola palabra generica en comun (ej. "router") no es señal suficiente de que se
+// trata de ESE problema especifico: "router" tambien aparece en la descripcion de "Router
+// con luz roja" aunque el usuario nunca haya mencionado ninguna luz. Exigir al menos 2
+// coincidencias evita diagnosticos inventados a partir de una sola palabra suelta.
+const MIN_MATCH_SCORE = 2;
+
 function bestMatch(problems: TechnicalProblem[], tokens: Set<string>): { problem: TechnicalProblem; score: number } | null {
   if (tokens.size === 0) {
     return null;
@@ -43,7 +49,7 @@ function bestMatch(problems: TechnicalProblem[], tokens: Set<string>): { problem
   let best: { problem: TechnicalProblem; score: number } | null = null;
   for (const problem of problems) {
     const score = scoreProblem(problem, tokens);
-    if (score > 0 && (!best || score > best.score)) {
+    if (score >= MIN_MATCH_SCORE && (!best || score > best.score)) {
       best = { problem, score };
     }
   }

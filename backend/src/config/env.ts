@@ -27,6 +27,9 @@ export const env = {
   // para poder desactivarlo en tests (deterministas, sin red) igual que las API keys de IA.
   weatherEnabled: process.env.WEATHER_ENABLED !== "false",
 
+  // ip-api.com tampoco usa API key; mismo motivo que weatherEnabled.
+  ipLookupEnabled: process.env.IP_LOOKUP_ENABLED !== "false",
+
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
   rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 300),
   authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 10),

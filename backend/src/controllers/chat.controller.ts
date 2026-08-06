@@ -10,6 +10,7 @@ export const chatController = {
       conversationId: req.body.conversationId,
       message: req.body.message,
       zone: req.body.zone,
+      ip: req.ip,
     });
     res.status(200).json(result);
   }),

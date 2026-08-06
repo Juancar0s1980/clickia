@@ -4,6 +4,10 @@ export interface Diagnostic {
   problem_id: string | null;
   zone: string | null;
   network_status: string | null;
+  weather_description: string | null;
+  weather_is_severe: boolean | null;
+  isp_name: string | null;
+  isp_city: string | null;
   fecha_creacion: Date;
 }
 

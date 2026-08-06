@@ -72,4 +72,14 @@ describe("knowledgeBaseService.findRelevantProblem", () => {
     const match = await knowledgeBaseService.findRelevantProblem("sigue sin funcionar");
     expect(match).toBeNull();
   });
+
+  it("una sola palabra genérica en común no basta para inventar un diagnóstico no mencionado (regresión: 'router' solo no debe activar 'Router con luz roja')", async () => {
+    // Bug real: el usuario preguntó cómo entrar a su router TP-Link para cambiar la
+    // contraseña (nunca mencionó ninguna luz), pero "router" por sí solo coincidía con
+    // "Router con luz roja" y el chat terminaba hablando de una luz roja inexistente.
+    const match = await knowledgeBaseService.findRelevantProblem(
+      "mi router es un tplink como accedo a el para cambiar la contraseña",
+    );
+    expect(match).toBeNull();
+  });
 });

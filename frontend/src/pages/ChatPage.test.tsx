@@ -60,6 +60,8 @@ const TICKET: Ticket = {
   descripcion: "El internet sigue sin funcionar tras los pasos sugeridos.",
   prioridad: "media",
   estado: "abierto",
+  respuesta: null,
+  fecha_respuesta: null,
   fecha_creacion: "2026-01-01T10:05:00.000Z",
   updated_at: "2026-01-01T10:05:00.000Z",
 };

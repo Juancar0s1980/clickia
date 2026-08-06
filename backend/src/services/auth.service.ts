@@ -32,6 +32,7 @@ export const authService = {
     password: string;
     direccion: string;
     telefono?: string;
+    aceptoDatos: boolean;
   }): Promise<PublicUser> {
     const existing = await userRepository.findByEmail(input.email);
     if (existing) {
@@ -45,6 +46,7 @@ export const authService = {
       passwordHash,
       direccion: input.direccion,
       telefono: input.telefono,
+      aceptoDatos: input.aceptoDatos,
     });
 
     return toPublicUser(user);

@@ -7,7 +7,7 @@ describe("Autenticación", () => {
 
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Ana Pérez", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán" })
+      .send({ nombre: "Ana Pérez", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
       .expect(201);
 
     expect(res.body.user).toMatchObject({ nombre: "Ana Pérez", email });
@@ -19,7 +19,7 @@ describe("Autenticación", () => {
 
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Otro", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán" })
+      .send({ nombre: "Otro", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
       .expect(409);
 
     expect(res.body.error).toMatch(/ya existe/i);
@@ -37,7 +37,27 @@ describe("Autenticación", () => {
   it("exige la dirección de instalación", async () => {
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Sin Dirección", email: `sindireccion.${Date.now()}@example.com`, password: "clave12345" })
+      .send({
+        nombre: "Sin Dirección",
+        email: `sindireccion.${Date.now()}@example.com`,
+        password: "clave12345",
+        aceptoDatos: true,
+      })
+      .expect(400);
+
+    expect(res.body.error).toBeDefined();
+  });
+
+  it("exige aceptar el almacenamiento de datos antes de registrar", async () => {
+    const res = await request(app)
+      .post("/api/users")
+      .send({
+        nombre: "Sin Consentimiento",
+        email: `sinconsentimiento.${Date.now()}@example.com`,
+        password: "clave12345",
+        direccion: "Calle 5 # 10-20, Popayán",
+        aceptoDatos: false,
+      })
       .expect(400);
 
     expect(res.body.error).toBeDefined();
@@ -48,7 +68,7 @@ describe("Autenticación", () => {
     const password = "clave12345";
     await request(app)
       .post("/api/users")
-      .send({ nombre: "Login Test", email, password, direccion: "Calle 5 # 10-20, Popayán" })
+      .send({ nombre: "Login Test", email, password, direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
       .expect(201);
 
     const res = await request(app).post("/api/auth/login").send({ email, password }).expect(200);

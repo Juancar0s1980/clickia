@@ -257,5 +257,76 @@ describe("Admin", () => {
         .send({ estado: "resuelto" })
         .expect(404);
     });
+
+    it("permite al admin dejar una respuesta escrita junto con el cambio de estado, y el cliente la ve", async () => {
+      const admin = await registerAndLoginAsAdmin("tickets-respond-admin");
+      const customer = await registerAndLogin("tickets-respond-customer");
+
+      const created = await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ descripcion: "El internet sigue caído después de todos los pasos sugeridos." })
+        .expect(201);
+
+      const updated = await request(app)
+        .patch(`/api/admin/tickets/${created.body.ticket.id}`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ estado: "resuelto", respuesta: "Un técnico revisó el nodo de tu zona y ya quedó operativo." })
+        .expect(200);
+
+      expect(updated.body.ticket.estado).toBe("resuelto");
+      expect(updated.body.ticket.respuesta).toBe("Un técnico revisó el nodo de tu zona y ya quedó operativo.");
+      expect(updated.body.ticket.fecha_respuesta).toEqual(expect.any(String));
+
+      const list = await request(app)
+        .get("/api/tickets")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .expect(200);
+      const own = list.body.tickets.find((t: { id: string }) => t.id === created.body.ticket.id);
+      expect(own.respuesta).toBe("Un técnico revisó el nodo de tu zona y ya quedó operativo.");
+    });
+
+    it("permite cambiar solo el estado sin borrar una respuesta ya guardada", async () => {
+      const admin = await registerAndLoginAsAdmin("tickets-keep-respond-admin");
+      const customer = await registerAndLogin("tickets-keep-respond-customer");
+
+      const created = await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ descripcion: "Problema de conexión" })
+        .expect(201);
+
+      await request(app)
+        .patch(`/api/admin/tickets/${created.body.ticket.id}`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ estado: "resuelto", respuesta: "Ya se solucionó desde nuestro lado." })
+        .expect(200);
+
+      const closed = await request(app)
+        .patch(`/api/admin/tickets/${created.body.ticket.id}`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ estado: "cerrado" })
+        .expect(200);
+
+      expect(closed.body.ticket.estado).toBe("cerrado");
+      expect(closed.body.ticket.respuesta).toBe("Ya se solucionó desde nuestro lado.");
+    });
+
+    it("rechaza una respuesta vacía", async () => {
+      const admin = await registerAndLoginAsAdmin("tickets-empty-respond-admin");
+      const customer = await registerAndLogin("tickets-empty-respond-customer");
+
+      const created = await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ descripcion: "Problema de conexión" })
+        .expect(201);
+
+      await request(app)
+        .patch(`/api/admin/tickets/${created.body.ticket.id}`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ estado: "en_proceso", respuesta: "" })
+        .expect(400);
+    });
   });
 });

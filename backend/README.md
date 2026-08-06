@@ -38,22 +38,28 @@ Todos bajo el prefijo `/api`.
 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| POST | `/api/users` | No | Registro de usuario |
+| POST | `/api/users` | No | Registro de usuario (exige `aceptoDatos: true`) |
 | POST | `/api/auth/login` | No | Login, devuelve access + refresh token |
 | POST | `/api/auth/refresh` | No | Rota el refresh token y emite uno nuevo |
 | POST | `/api/auth/logout` | No | Revoca el refresh token |
+| PATCH | `/api/users/me/password` | Sí | Cambia la contraseña (no pasa por el chat) |
 | GET | `/api/conversations` | Sí | Lista conversaciones del usuario autenticado |
 | GET | `/api/conversations/:id` | Sí | Conversación + mensajes |
-| POST | `/api/chat` | Sí | Envía un mensaje y ejecuta el flujo de diagnóstico |
+| POST | `/api/chat` | Sí | Envía un mensaje y ejecuta el flujo de diagnóstico (RAG + clima + ISP) |
 | POST | `/api/tickets` | Sí | Crea un ticket (escala la conversación si aplica) |
-| GET | `/api/tickets` | Sí | Lista tickets del usuario |
-| GET | `/api/network/status?zone=` | No | API ISP simulada |
-| POST | `/api/admin/users` | Admin | Registra un cliente (con `tipoServicio`) |
+| GET | `/api/tickets` | Sí | Lista tickets del usuario, con la respuesta del admin si ya existe |
+| GET | `/api/network/status?zone=` | No | API ISP simulada (estado por zona) |
+| GET | `/api/plans` | Sí | Catálogo de planes (usado por el chat y por la página "Planes") |
+| GET | `/api/weather?zone=` | Sí | Clima actual de una zona (2da API externa) |
+| POST | `/api/admin/users` | Admin | Registra un cliente (con `tipoServicio`, `direccion`) |
+| POST | `/api/admin/users/bulk` | Admin | Carga masiva de clientes por CSV (parcial: reporta fila a fila) |
 | GET | `/api/admin/users` | Admin | Lista todos los usuarios registrados |
 | GET | `/api/admin/users/:userId/conversations` | Admin | Conversaciones de cualquier usuario |
 | GET | `/api/admin/conversations/:id` | Admin | Detalle de cualquier conversación |
 | GET | `/api/admin/network-status` | Admin | Lista el estado de todas las zonas |
 | PATCH | `/api/admin/network-status/:zone` | Admin | Actualiza estado/tiempo estimado de una zona |
+| GET | `/api/admin/tickets` | Admin | Lista todos los tickets, con nombre/correo del cliente |
+| PATCH | `/api/admin/tickets/:id` | Admin | Cambia `estado` y opcionalmente deja una `respuesta` escrita para el cliente |
 | GET | `/api/admin/stats/summary` | Admin | Totales: usuarios, conversaciones, tickets |
 | GET | `/api/admin/stats/top-problems` | Admin | Problemas más frecuentes detectados por el chat |
 
@@ -130,6 +136,56 @@ palabra completa (`Set` de tokens) más una lista de stopwords en español, y
 se reverificó que los casos reales (wifi lento, router con luz roja) siguen
 matcheando correctamente.
 
+## Funcionalidades agregadas después de la Fase 4
+
+**Memoria de conversación:** `chat.service.ts` pasa el historial reciente
+(hasta 10 mensajes) tanto al LLM como al matcher de la base de conocimiento,
+así un mensaje de seguimiento sin señales propias ("sigue sin funcionar")
+mantiene el mismo diagnóstico en vez de perder el hilo. Si ya se dieron
+pasos para el mismo problema y el usuario indica que sigue sin resolverse,
+el chat deja de repetir esos pasos y ofrece crear un ticket.
+
+**Filtro de temas fuera de propósito** (`topicGuard.service.ts`): antes de
+tocar la base de conocimiento o el LLM, un filtro por vocabulario del
+dominio (conectividad, TV, planes, cuenta) decide si el mensaje es sobre el
+servicio de DobleClick; si no lo es (ni continúa una conversación que ya lo
+era), responde con un mensaje fijo y cordial sin gastar tokens del
+proveedor de IA.
+
+**Bug real corregido — falso positivo por una sola palabra:** el matcher
+aceptaba un "match" con una sola coincidencia de palabra, así que un
+mensaje como *"¿cómo accedo a mi router TP-Link para cambiar la
+contraseña?"* activaba por error el diagnóstico de "Router con luz roja"
+(la palabra "router" aparece en ambos, mientras que "contraseña" tenía un
+typo que no matcheaba nada más). Se corrigió exigiendo al menos 2 palabras
+en común antes de dar un problema por identificado.
+
+**Catálogo de planes** (`plan.service.ts`, `plan.controller.ts`): planes
+reales de DobleClick sembrados en la tabla `plans`. El chat detecta
+preguntas de plan/precio (incluyendo seguimientos como "¿y el de 300?") y
+responde con los precios exactos del catálogo — nunca los inventa.
+
+**Clima e ISP como señales de diagnóstico** (`weather.service.ts`,
+`ipLookup.service.ts`): ver la sección de [APIs externas en el README
+raíz](../README.md#apis-externas). Ambos se consultan solo para problemas
+técnicos reales, se degradan sin romper el chat si fallan, y sus datos se
+guardan en `diagnostics` (no se descartan tras la respuesta).
+
+**Gestión de tickets con respuesta:** el admin no solo cambia el estado de
+un ticket (`abierto` → `en_proceso` → `resuelto` → `cerrado`); puede dejar
+una respuesta escrita para el cliente (`PATCH /api/admin/tickets/:id` con
+`respuesta`), que el cliente ve en su propia página de tickets.
+
+**Consentimiento de datos:** el registro (`POST /api/users`) exige
+`aceptoDatos: true`; sin eso, la validación de entrada rechaza la
+petición antes de tocar la base de datos. Se guarda `acepto_datos` +
+`acepto_datos_at` en `users`.
+
+**Zona Timbío y dirección de instalación:** además de las zonas/barrios de
+Popayán, `network_status` incluye Timbío (municipio vecino que DobleClick
+también atiende, con sus propias coordenadas para el clima). El registro
+de usuario exige una dirección de instalación (`direccion`).
+
 ## Seguridad (Fase 6)
 
 - **Helmet**: cabeceras de seguridad estándar (`X-Content-Type-Options`,
@@ -176,7 +232,7 @@ re-verificó en navegador con toda la seguridad activa, sin regresiones.
 
 ```bash
 curl -X POST localhost:4000/api/users -H "Content-Type: application/json" \
-  -d '{"nombre":"Juan","email":"juan@example.com","password":"clave12345"}'
+  -d '{"nombre":"Juan","email":"juan@example.com","password":"clave12345","direccion":"Calle 5 # 10-20, Popayán","aceptoDatos":true}'
 
 curl -X POST localhost:4000/api/auth/login -H "Content-Type: application/json" \
   -d '{"email":"juan@example.com","password":"clave12345"}'
@@ -202,12 +258,22 @@ npm test
 ```
 
 `jest.global-setup.js` aplica migraciones + seed una sola vez antes de toda
-la suite (reutiliza `src/database/migrate.ts`). `GEMINI_API_KEY` y
-`GROQ_API_KEY` van vacías a propósito en `.env.test.example`: sin proveedor
-configurado, `/chat` siempre cae a la plantilla de fallback, así los tests
-son deterministas y no dependen de un LLM real.
+la suite (reutiliza `src/database/migrate.ts`). `GEMINI_API_KEY`,
+`GROQ_API_KEY`, `WEATHER_ENABLED` e `IP_LOOKUP_ENABLED` van vacías/en
+`false` a propósito en `.env.test.example`: sin proveedor de IA
+configurado, `/chat` siempre cae a la plantilla de fallback, y sin las
+otras dos APIs activas los tests no dependen de servicios externos ni de
+red — todo determinista.
 
-**Cobertura (46 tests):**
+**Cobertura (142 tests, 18 suites):** además de lo listado abajo (vigente
+desde la Fase 7), se agregaron suites para cada pieza nueva:
+`plan.service.test.ts`, `weather.service.test.ts`, `ipLookup.service.test.ts`,
+`topicGuard.service.test.ts`, `chat.service.test.ts` (memoria de
+conversación, cuándo se consultan clima/ISP, persistencia en
+`diagnostics`), `promptBuilder.test.ts`, y ampliaciones de
+`knowledgeBase.service.test.ts` (regresión del bug de falso positivo),
+`replyComposer.test.ts`, `admin.test.ts` (respuesta de tickets) y
+`auth.test.ts` (consentimiento de datos).
 
 - **Unitarias** (mockeando repositorios/red, sin DB):
   `knowledgeBase.service.test.ts` (incluye test de regresión del bug de

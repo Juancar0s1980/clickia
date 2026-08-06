@@ -3,6 +3,7 @@ import { diagnosticRepository } from "../repositories/diagnostic.repository";
 import { messageRepository } from "../repositories/message.repository";
 import { ApiError } from "../utils/ApiError";
 import { generateAiReply } from "./ai/aiReply.service";
+import { ipLookupService } from "./ipLookup.service";
 import { knowledgeBaseService } from "./knowledgeBase.service";
 import { networkStatusService } from "./networkStatus.service";
 import { planService } from "./plan.service";
@@ -15,6 +16,7 @@ export const chatService = {
     conversationId?: string;
     message: string;
     zone?: string;
+    ip?: string;
   }) {
     const conversation = input.conversationId
       ? await conversationRepository.findById(input.conversationId)
@@ -51,20 +53,27 @@ export const chatService = {
     const match = await knowledgeBaseService.findRelevantProblem(input.message, history);
     const networkStatus = await networkStatusService.getStatus(input.zone);
     const plans = await planService.findRelevantPlans(input.message, history);
-    // El clima solo aporta como señal para un problema tecnico real (no para consultas de
-    // cuenta/comerciales como "mejorar mi plan"), asi que solo se consulta en ese caso.
-    const weather =
-      match && match.problem.categoria !== "cuenta" ? await weatherService.getCurrent(networkStatus.zone) : null;
-    const aiReply = await generateAiReply(input.message, match, networkStatus, plans, history, weather);
+    // El clima y el ISP detectado solo aportan como señal para un problema tecnico real
+    // (no para consultas de cuenta/comerciales como "mejorar mi plan").
+    const isTechnicalMatch = match !== null && match.problem.categoria !== "cuenta";
+    const weather = isTechnicalMatch ? await weatherService.getCurrent(networkStatus.zone) : null;
+    const ispInfo = isTechnicalMatch && input.ip ? await ipLookupService.getInfo(input.ip) : null;
+    const aiReply = await generateAiReply(input.message, match, networkStatus, plans, history, weather, ispInfo);
 
     const aiMessage = await messageRepository.create(conversation.id, "ai", aiReply.text);
 
-    // Alimenta las estadisticas de "fallas mas recurrentes" del panel de admin.
+    // Alimenta las estadisticas de "fallas mas recurrentes" del panel de admin, y guarda
+    // los datos relevantes obtenidos de la segunda/tercera API (clima, ISP) en vez de
+    // descartarlos tras usarlos solo para la respuesta.
     await diagnosticRepository.create({
       conversationId: conversation.id,
       problemId: match?.problem.id ?? null,
       zone: networkStatus.zone,
       networkStatus: networkStatus.status,
+      weatherDescription: weather?.description ?? null,
+      weatherIsSevere: weather?.isSevere ?? null,
+      ispName: ispInfo?.isp ?? null,
+      ispCity: ispInfo?.city ?? null,
     });
 
     return {

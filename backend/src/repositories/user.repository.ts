@@ -20,10 +20,14 @@ export const userRepository = {
     telefono?: string;
     role?: UserRole;
     tipoServicio?: TipoServicio;
+    // Solo lo trae el registro propio (la persona aceptando por si misma); las cuentas
+    // creadas por un admin quedan en false por defecto.
+    aceptoDatos?: boolean;
   }): Promise<User> {
+    const aceptoDatos = input.aceptoDatos ?? false;
     const { rows } = await pool.query<User>(
-      `INSERT INTO users (nombre, email, password_hash, direccion, telefono, role, tipo_servicio)
-       VALUES ($1, $2, $3, $4, $5, COALESCE($6, 'user'), COALESCE($7, 'wifi'))
+      `INSERT INTO users (nombre, email, password_hash, direccion, telefono, role, tipo_servicio, acepto_datos, acepto_datos_at)
+       VALUES ($1, $2, $3, $4, $5, COALESCE($6, 'user'), COALESCE($7, 'wifi'), $8, CASE WHEN $8 THEN now() ELSE NULL END)
        RETURNING *`,
       [
         input.nombre,
@@ -33,6 +37,7 @@ export const userRepository = {
         input.telefono ?? null,
         input.role ?? null,
         input.tipoServicio ?? null,
+        aceptoDatos,
       ],
     );
     return rows[0]!;

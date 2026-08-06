@@ -8,6 +8,8 @@ export interface User {
   password_hash: string;
   telefono: string | null;
   direccion: string;
+  acepto_datos: boolean;
+  acepto_datos_at: Date | null;
   role: UserRole;
   tipo_servicio: TipoServicio;
   activo: boolean;

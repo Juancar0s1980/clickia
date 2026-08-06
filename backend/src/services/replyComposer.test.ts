@@ -1,4 +1,5 @@
 import { KnowledgeMatch } from "./knowledgeBase.service";
+import { IspInfo } from "./ipLookup.service";
 import { NetworkStatus } from "./networkStatus.service";
 import { WeatherSnapshot } from "./weather.service";
 import { Message } from "../models/message.model";
@@ -166,6 +167,21 @@ describe("buildDiagnosticReply", () => {
     it("no menciona el clima si no hay ningún problema técnico identificado", () => {
       const reply = buildDiagnosticReply(null, operativo, null, [], tormenta);
       expect(reply).not.toMatch(/tormenta eléctrica/);
+    });
+  });
+
+  describe("proveedor/ISP detectado como señal de diagnóstico", () => {
+    const ispInfo: IspInfo = { ip: "34.1.2.3", isp: "Tigo Colombia", org: "Tigo", asn: "AS14080", city: "Bogotá" };
+
+    it("menciona el proveedor detectado junto con los pasos técnicos", () => {
+      const reply = buildDiagnosticReply(match, operativo, null, [], null, ispInfo);
+      expect(reply).toMatch(/Tigo Colombia/);
+      expect(reply).toMatch(/1\. Reinicie el router/);
+    });
+
+    it("no menciona el proveedor si no hay ningún problema técnico identificado", () => {
+      const reply = buildDiagnosticReply(null, operativo, null, [], null, ispInfo);
+      expect(reply).not.toMatch(/Tigo Colombia/);
     });
   });
 });

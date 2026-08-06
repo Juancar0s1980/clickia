@@ -17,6 +17,9 @@ const registerSchema = z.object({
   password: z.string().min(8, "Mínimo 8 caracteres"),
   direccion: z.string().min(5, "Ingresa la dirección de instalación"),
   telefono: z.string().optional(),
+  aceptoDatos: z.boolean().refine((v) => v === true, {
+    message: "Debes aceptar el almacenamiento de tus datos y conversaciones para continuar",
+  }),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -30,7 +33,10 @@ export function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterFormValues>({ resolver: zodResolver(registerSchema) });
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { aceptoDatos: false },
+  });
 
   async function onSubmit(values: RegisterFormValues) {
     setServerError(null);
@@ -77,6 +83,21 @@ export function RegisterPage() {
             {...register("direccion")}
           />
           <Input label="Teléfono (opcional)" type="tel" autoComplete="tel" {...register("telefono")} />
+
+          <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+            Al crear tu cuenta, DobleClick almacenará tu nombre, datos de contacto, dirección y el
+            historial de tus conversaciones con el chat, para poder brindarte soporte técnico.
+          </div>
+
+          <label className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-600"
+              {...register("aceptoDatos")}
+            />
+            <span>Acepto que mis datos y conversaciones sean almacenados para este fin.</span>
+          </label>
+          {errors.aceptoDatos && <p className="-mt-2 text-xs text-red-600 dark:text-red-400">{errors.aceptoDatos.message}</p>}
 
           {serverError && <ErrorBanner message={serverError} />}
           {success && (

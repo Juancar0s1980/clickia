@@ -13,6 +13,8 @@ const EXISTING_USER: User = {
   email: "cliente@example.com",
   telefono: null,
   direccion: "Calle 5 # 10-20, Popayán",
+  acepto_datos: true,
+  acepto_datos_at: "2026-01-01T10:00:00.000Z",
   role: "user",
   tipo_servicio: "wifi",
   activo: true,

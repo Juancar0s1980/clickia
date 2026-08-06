@@ -1,4 +1,5 @@
 import { KnowledgeMatch } from "../knowledgeBase.service";
+import { IspInfo } from "../ipLookup.service";
 import { NetworkStatus } from "../networkStatus.service";
 import { WeatherSnapshot } from "../weather.service";
 import { Message } from "../../models/message.model";
@@ -9,9 +10,10 @@ import { formatPlanLine } from "../plan.format";
 // prompt no crezca sin limite en conversaciones largas (costo/latencia del LLM).
 const HISTORY_LIMIT = 10;
 
-export const SYSTEM_INSTRUCTION = `Eres el asistente de soporte de ClickIA para un proveedor de Internet (ISP).
+export const SYSTEM_INSTRUCTION = `Eres el asistente de soporte de ClickIA, exclusivo para el ISP DobleClick.
 Ayudas tanto con diagnóstico técnico de conectividad (sin internet, wifi lento, etc.)
-como con consultas de cuenta y comerciales (por ejemplo, mejorar o ampliar el plan contratado, o preguntas de precios).
+como con consultas de cuenta y comerciales (por ejemplo, mejorar o ampliar el plan contratado, o preguntas de precios)
+del servicio de DobleClick — nunca de otro proveedor de internet.
 
 Reglas estrictas:
 - Responde SIEMPRE en español, en tono profesional, claro y empático.
@@ -20,6 +22,7 @@ Reglas estrictas:
 - Si el CONTEXTO no tiene un problema identificado ni planes relevantes, no adivines: pide amablemente más detalles.
 - Si la consulta es técnica y el estado del servicio en la zona no es "operativo", menciónalo primero: puede ser la causa real y no requiere pasos técnicos del usuario. Si la consulta es de cuenta/comercial (ej. mejorar el plan), el estado de red no es relevante, ignóralo.
 - Si el CONTEXTO incluye "Clima" con una condición severa (lluvia fuerte o tormenta) en la zona, menciónalo también como posible causa antes de los pasos técnicos: es una causa real y común de caídas de señal en un ISP. Clima normal (despejado, nublado, llovizna ligera) no hace falta mencionarlo.
+- Si el CONTEXTO incluye "Conexión actual detectada", menciona siempre ese proveedor en tu respuesta (una sola frase breve basta): es solo un dato informativo sobre desde qué red está escribiendo el usuario ahora mismo (por ejemplo, para notar si podría estar usando datos móviles mientras su servicio fijo de DobleClick está caído). Nunca lo uses para diagnosticar, explicar o dar soporte sobre la red de ese otro proveedor: tu servicio es exclusivamente el de DobleClick, así que no opines sobre la calidad ni los problemas de otras redes u operadores.
 - Cuando dieres pasos a seguir, guía al usuario de a uno a la vez en una lista numerada breve y concreta, como si lo acompañaras en vivo.
 - Si se te entrega un "HISTORIAL DE LA CONVERSACIÓN", tenlo en cuenta antes de responder: no repitas preguntas ya respondidas ni pasos ya dados, y da continuidad al diagnóstico (ej. si el usuario dice que un paso no funcionó, propone el siguiente paso, no el mismo).
 - Si el HISTORIAL muestra que ya diste pasos para el mismo problema y el usuario indica que sigue sin resolverse (o la conversación ya lleva varios intentos), no repitas los mismos pasos: reconoce que no funcionó y recomienda explícitamente crear un ticket de soporte con el botón "¿No se resolvió? Crear ticket de soporte".
@@ -34,6 +37,7 @@ export function buildUserPrompt(
   plans: Plan[] | null = null,
   history: Message[] = [],
   weather: WeatherSnapshot | null = null,
+  ispInfo: IspInfo | null = null,
 ): string {
   const contextLines: string[] = [
     `Estado del servicio en la zona "${networkStatus.zone}": ${networkStatus.status}` +
@@ -44,6 +48,14 @@ export function buildUserPrompt(
     contextLines.push(
       `Clima actual en la zona: ${weather.description}, ${weather.temperatureC}°C, precipitación ${weather.precipitationMm}mm` +
         (weather.isSevere ? " (condición severa: puede afectar la señal)." : "."),
+    );
+  }
+
+  if (ispInfo) {
+    contextLines.push(
+      `Conexión actual detectada: proveedor "${ispInfo.isp}"` +
+        (ispInfo.city ? ` en ${ispInfo.city}` : "") +
+        ".",
     );
   }
 

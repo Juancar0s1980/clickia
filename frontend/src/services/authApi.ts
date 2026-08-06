@@ -14,6 +14,7 @@ export const authApi = {
     password: string;
     direccion: string;
     telefono?: string;
+    aceptoDatos: boolean;
   }): Promise<User> {
     const { data } = await httpClient.post<{ user: User }>("/users", input);
     return data.user;

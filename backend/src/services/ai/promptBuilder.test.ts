@@ -1,4 +1,5 @@
 import { Message } from "../../models/message.model";
+import { IspInfo } from "../ipLookup.service";
 import { NetworkStatus } from "../networkStatus.service";
 import { WeatherSnapshot } from "../weather.service";
 import { buildUserPrompt } from "./promptBuilder";
@@ -48,5 +49,16 @@ describe("buildUserPrompt", () => {
   it("no incluye clima cuando no se entrega", () => {
     const prompt = buildUserPrompt("no tengo internet", null, status);
     expect(prompt).not.toMatch(/Clima actual/);
+  });
+
+  it("incluye el proveedor/ISP detectado en el CONTEXTO cuando se entrega", () => {
+    const ispInfo: IspInfo = { ip: "34.1.2.3", isp: "Claro Colombia", org: "Claro", asn: "AS3816", city: "Popayán" };
+    const prompt = buildUserPrompt("no tengo internet", null, status, null, [], null, ispInfo);
+    expect(prompt).toMatch(/Conexión actual detectada: proveedor "Claro Colombia" en Popayán/);
+  });
+
+  it("no incluye el proveedor/ISP cuando no se entrega", () => {
+    const prompt = buildUserPrompt("no tengo internet", null, status);
+    expect(prompt).not.toMatch(/Conexión actual detectada/);
   });
 });
