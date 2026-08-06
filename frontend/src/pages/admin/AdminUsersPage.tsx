@@ -42,7 +42,11 @@ export function AdminUsersPage() {
           <h1 className="text-xl font-semibold text-slate-800">Usuarios registrados</h1>
           <p className="text-sm text-slate-500">Crea cuentas de clientes y consulta sus conversaciones.</p>
         </div>
-        {!showForm && <Button onClick={() => setShowForm(true)}>+ Registrar usuario</Button>}
+        {!showForm && (
+          <Button variant="accent" onClick={() => setShowForm(true)}>
+            + Registrar usuario
+          </Button>
+        )}
       </div>
 
       {showForm && (

@@ -61,7 +61,9 @@ export function DashboardPage() {
       <Card className="p-5">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Conversaciones recientes</h2>
-          <Button onClick={() => navigate("/chat")}>+ Nueva consulta</Button>
+          <Button variant="accent" onClick={() => navigate("/chat")}>
+            + Nueva consulta
+          </Button>
         </div>
 
         {isConversationsLoading && <Spinner size="sm" />}

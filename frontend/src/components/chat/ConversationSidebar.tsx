@@ -27,7 +27,7 @@ export function ConversationSidebar({
   return (
     <aside className="flex w-72 shrink-0 flex-col border-r border-slate-200 bg-white">
       <div className="border-b border-slate-200 p-3">
-        <Button className="w-full" onClick={onNewConversation}>
+        <Button variant="accent" className="w-full" onClick={onNewConversation}>
           + Nueva consulta
         </Button>
       </div>

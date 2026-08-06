@@ -2,13 +2,15 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { Spinner } from "./Spinner";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "accent" | "ghost";
   isLoading?: boolean;
 }
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary: "bg-primary text-white hover:bg-primary-dark disabled:bg-blue-300",
   secondary: "bg-white text-primary border border-primary hover:bg-blue-50 disabled:opacity-50",
+  // Acento verde de DobleClick: para la unica acción más destacada de una pantalla, no para uso general.
+  accent: "bg-accent text-white hover:bg-accent-dark disabled:opacity-50",
   ghost: "bg-transparent text-slate-600 hover:bg-slate-100 disabled:opacity-50",
 };
 
