@@ -19,3 +19,7 @@ export const updateNetworkStatusSchema = z.object({
 export const bulkCreateUsersSchema = z.object({
   rows: z.array(z.record(z.unknown())).min(1).max(200),
 });
+
+export const updateTicketStatusSchema = z.object({
+  estado: z.enum(["abierto", "en_proceso", "resuelto", "cerrado"]),
+});

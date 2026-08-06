@@ -1,4 +1,13 @@
-import { Conversation, Message, NetworkStatus, NetworkServiceStatus, TipoServicio, User } from "../types/api";
+import {
+  Conversation,
+  Message,
+  NetworkStatus,
+  NetworkServiceStatus,
+  TicketEstado,
+  TicketWithUser,
+  TipoServicio,
+  User,
+} from "../types/api";
 import { httpClient } from "./httpClient";
 
 export interface AdminSummary {
@@ -87,5 +96,15 @@ export const adminApi = {
   async getTopProblems(): Promise<TopProblem[]> {
     const { data } = await httpClient.get<{ problems: TopProblem[] }>("/admin/stats/top-problems");
     return data.problems;
+  },
+
+  async listTickets(): Promise<TicketWithUser[]> {
+    const { data } = await httpClient.get<{ tickets: TicketWithUser[] }>("/admin/tickets");
+    return data.tickets;
+  },
+
+  async updateTicketStatus(id: string, estado: TicketEstado): Promise<TicketWithUser> {
+    const { data } = await httpClient.patch<{ ticket: TicketWithUser }>(`/admin/tickets/${id}`, { estado });
+    return data.ticket;
   },
 };

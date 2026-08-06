@@ -2,8 +2,10 @@ import { conversationRepository } from "../repositories/conversation.repository"
 import { diagnosticRepository } from "../repositories/diagnostic.repository";
 import { messageRepository } from "../repositories/message.repository";
 import { statsRepository } from "../repositories/stats.repository";
+import { ticketRepository } from "../repositories/ticket.repository";
 import { userRepository } from "../repositories/user.repository";
 import { PublicUser, TipoServicio, toPublicUser } from "../models/user.model";
+import { TicketEstado } from "../models/ticket.model";
 import { ApiError } from "../utils/ApiError";
 import { hashPassword } from "../utils/password";
 import { networkStatusService } from "./networkStatus.service";
@@ -119,5 +121,17 @@ export const adminService = {
       categoria: r.categoria,
       total: Number(r.total),
     }));
+  },
+
+  async listTickets() {
+    return ticketRepository.findAllWithUser();
+  },
+
+  async updateTicketStatus(ticketId: string, estado: TicketEstado) {
+    const ticket = await ticketRepository.updateEstado(ticketId, estado);
+    if (!ticket) {
+      throw ApiError.notFound("Ticket no encontrado");
+    }
+    return ticket;
   },
 };

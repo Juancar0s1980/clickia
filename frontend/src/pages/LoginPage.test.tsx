@@ -41,7 +41,7 @@ describe("LoginPage", () => {
     renderLogin();
 
     await userEvent.type(screen.getByLabelText(/correo electrónico/i), "user@example.com");
-    await userEvent.type(screen.getByLabelText(/contraseña/i), "clave12345");
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), "clave12345");
     await userEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
     await waitFor(() => expect(loginMock).toHaveBeenCalledWith("user@example.com", "clave12345"));
@@ -55,7 +55,7 @@ describe("LoginPage", () => {
     renderLogin();
 
     await userEvent.type(screen.getByLabelText(/correo electrónico/i), "user@example.com");
-    await userEvent.type(screen.getByLabelText(/contraseña/i), "clave-incorrecta");
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), "clave-incorrecta");
     await userEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
     expect(await screen.findByText(/credenciales inválidas/i)).toBeInTheDocument();

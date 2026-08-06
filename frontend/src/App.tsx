@@ -4,6 +4,7 @@ import { AppShell } from "./components/layout/AppShell";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import { AdminConversationDetailPage } from "./pages/admin/AdminConversationDetailPage";
 import { AdminNetworkStatusPage } from "./pages/admin/AdminNetworkStatusPage";
+import { AdminTicketsPage } from "./pages/admin/AdminTicketsPage";
 import { AdminUserConversationsPage } from "./pages/admin/AdminUserConversationsPage";
 import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { ChatPage } from "./pages/ChatPage";
@@ -31,6 +32,7 @@ export function App() {
             <Route path="/admin/users/:userId" element={<AdminUserConversationsPage />} />
             <Route path="/admin/conversations/:id" element={<AdminConversationDetailPage />} />
             <Route path="/admin/network-status" element={<AdminNetworkStatusPage />} />
+            <Route path="/admin/tickets" element={<AdminTicketsPage />} />
           </Route>
         </Route>
       </Route>

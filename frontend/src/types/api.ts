@@ -67,6 +67,11 @@ export interface Ticket {
   updated_at: string;
 }
 
+export interface TicketWithUser extends Ticket {
+  user_nombre: string;
+  user_email: string;
+}
+
 export interface ChatResponse {
   conversation: Conversation;
   reply: Message;

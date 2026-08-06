@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ticketsApi } from "../services/ticketsApi";
 
 export function useCreateTicket() {
@@ -8,6 +8,11 @@ export function useCreateTicket() {
     mutationFn: ticketsApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
     },
   });
+}
+
+export function useTickets() {
+  return useQuery({ queryKey: ["tickets"], queryFn: ticketsApi.list });
 }

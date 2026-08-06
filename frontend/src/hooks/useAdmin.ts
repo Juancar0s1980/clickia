@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "../services/adminApi";
-import { NetworkServiceStatus } from "../types/api";
+import { NetworkServiceStatus, TicketEstado } from "../types/api";
 
 export function useAdminUsers() {
   return useQuery({ queryKey: ["admin", "users"], queryFn: adminApi.listUsers });
@@ -63,4 +63,19 @@ export function useAdminSummary() {
 
 export function useAdminTopProblems() {
   return useQuery({ queryKey: ["admin", "stats", "top-problems"], queryFn: adminApi.getTopProblems });
+}
+
+export function useAdminTickets() {
+  return useQuery({ queryKey: ["admin", "tickets"], queryFn: adminApi.listTickets });
+}
+
+export function useUpdateTicketStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { id: string; estado: TicketEstado }) => adminApi.updateTicketStatus(input.id, input.estado),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats", "summary"] });
+    },
+  });
 }

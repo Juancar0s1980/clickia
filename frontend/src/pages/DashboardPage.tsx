@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkStatusBadge } from "../components/chat/NetworkStatusBadge";
+import { TicketStatusBadge } from "../components/tickets/TicketStatusBadge";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Spinner } from "../components/ui/Spinner";
@@ -8,6 +9,7 @@ import { ZONES } from "../constants/zones";
 import { useAuth } from "../context/AuthContext";
 import { useConversations } from "../hooks/useConversations";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
+import { useTickets } from "../hooks/useTickets";
 import { zoneStorage } from "../services/zoneStorage";
 import { TipoServicio } from "../types/api";
 import { AdminStatsPage } from "./admin/AdminStatsPage";
@@ -30,6 +32,7 @@ export function DashboardPage() {
 
   const { data: status, isLoading: isStatusLoading } = useNetworkStatus(zone);
   const { data: conversations, isLoading: isConversationsLoading } = useConversations();
+  const { data: tickets, isLoading: isTicketsLoading } = useTickets();
 
   // El admin no es cliente del ISP: en vez del panel de "mi servicio", ve
   // estadisticas de la operacion. La rama se decide despues de llamar todos
@@ -68,6 +71,27 @@ export function DashboardPage() {
           </select>
         </div>
         {isStatusLoading || !status ? <Spinner size="sm" /> : <NetworkStatusBadge status={status} />}
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Mis tickets</h2>
+        {isTicketsLoading && <Spinner size="sm" />}
+        {!isTicketsLoading && (tickets ?? []).length === 0 && (
+          <p className="text-sm text-slate-400 dark:text-slate-500">
+            No tienes tickets abiertos. Se crean desde el chat cuando un problema no se resuelve.
+          </p>
+        )}
+        <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700">
+          {(tickets ?? []).map((t) => (
+            <li key={t.id} className="flex items-center justify-between py-3 text-sm">
+              <div>
+                <p className="font-medium text-slate-700 dark:text-slate-200">{t.ticket_number}</p>
+                <p className="max-w-md truncate text-xs text-slate-500 dark:text-slate-400">{t.descripcion}</p>
+              </div>
+              <TicketStatusBadge estado={t.estado} />
+            </li>
+          ))}
+        </ul>
       </Card>
 
       <Card className="p-5">

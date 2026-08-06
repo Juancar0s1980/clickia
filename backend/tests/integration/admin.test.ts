@@ -198,4 +198,45 @@ describe("Admin", () => {
       expect(routerProblem.total).toBeGreaterThanOrEqual(3);
     });
   });
+
+  describe("Gestión de tickets", () => {
+    it("rechaza a un usuario normal", async () => {
+      const { accessToken } = await registerAndLogin("tickets-plain");
+      await request(app).get("/api/admin/tickets").set("Authorization", `Bearer ${accessToken}`).expect(403);
+    });
+
+    it("lista tickets de todos los usuarios con su nombre/correo y permite cambiar el estado", async () => {
+      const admin = await registerAndLoginAsAdmin("tickets-admin");
+      const customer = await registerAndLogin("tickets-customer");
+
+      const created = await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ descripcion: "El internet sigue caído después de todos los pasos sugeridos." })
+        .expect(201);
+
+      const list = await request(app)
+        .get("/api/admin/tickets")
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .expect(200);
+      const found = list.body.tickets.find((t: { id: string }) => t.id === created.body.ticket.id);
+      expect(found).toMatchObject({ user_email: customer.email, estado: "abierto" });
+
+      const updated = await request(app)
+        .patch(`/api/admin/tickets/${created.body.ticket.id}`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ estado: "en_proceso" })
+        .expect(200);
+      expect(updated.body.ticket.estado).toBe("en_proceso");
+    });
+
+    it("responde 404 al actualizar un ticket inexistente", async () => {
+      const admin = await registerAndLoginAsAdmin("tickets-404");
+      await request(app)
+        .patch("/api/admin/tickets/00000000-0000-0000-0000-000000000000")
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ estado: "resuelto" })
+        .expect(404);
+    });
+  });
 });

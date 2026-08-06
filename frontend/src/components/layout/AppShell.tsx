@@ -36,6 +36,9 @@ export function AppShell() {
               <NavLink to="/admin/network-status" className={NAV_LINK_CLASS}>
                 Estado de red
               </NavLink>
+              <NavLink to="/admin/tickets" className={NAV_LINK_CLASS}>
+                Tickets
+              </NavLink>
             </>
           )}
         </nav>

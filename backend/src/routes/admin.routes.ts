@@ -2,7 +2,12 @@ import { Router } from "express";
 import { adminController } from "../controllers/admin.controller";
 import { requireAdmin, requireAuth } from "../middleware/auth.middleware";
 import { validateBody } from "../middleware/validate.middleware";
-import { bulkCreateUsersSchema, createUserByAdminSchema, updateNetworkStatusSchema } from "../validators/admin.validator";
+import {
+  bulkCreateUsersSchema,
+  createUserByAdminSchema,
+  updateNetworkStatusSchema,
+  updateTicketStatusSchema,
+} from "../validators/admin.validator";
 
 const router = Router();
 
@@ -19,5 +24,8 @@ router.patch("/network-status/:zone", validateBody(updateNetworkStatusSchema), a
 
 router.get("/stats/summary", adminController.getSummary);
 router.get("/stats/top-problems", adminController.getTopProblems);
+
+router.get("/tickets", adminController.listTickets);
+router.patch("/tickets/:id", validateBody(updateTicketStatusSchema), adminController.updateTicketStatus);
 
 export default router;

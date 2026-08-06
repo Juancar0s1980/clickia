@@ -52,7 +52,7 @@ describe("AdminUsersPage", () => {
 
     await userEvent.type(screen.getByLabelText(/nombre completo/i), "Cliente Nuevo");
     await userEvent.type(screen.getByLabelText(/correo electrónico/i), "nuevo@example.com");
-    await userEvent.type(screen.getByLabelText(/contraseña/i), "clave12345");
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), "clave12345");
     await userEvent.selectOptions(screen.getByLabelText(/tipo de servicio/i), "tv");
 
     await userEvent.click(screen.getByRole("button", { name: "Crear usuario" }));

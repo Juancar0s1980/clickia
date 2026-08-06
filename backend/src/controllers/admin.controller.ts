@@ -52,4 +52,14 @@ export const adminController = {
     const problems = await adminService.getTopProblems();
     res.status(200).json({ problems });
   }),
+
+  listTickets: asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+    const tickets = await adminService.listTickets();
+    res.status(200).json({ tickets });
+  }),
+
+  updateTicketStatus: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const ticket = await adminService.updateTicketStatus(req.params.id!, req.body.estado);
+    res.status(200).json({ ticket });
+  }),
 };
