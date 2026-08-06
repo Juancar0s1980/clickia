@@ -14,6 +14,11 @@ export const adminController = {
     res.status(200).json({ users });
   }),
 
+  bulkCreateUsers: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await adminService.bulkCreateUsers(req.body.rows);
+    res.status(207).json(result);
+  }),
+
   getUserConversations: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const conversations = await adminService.getUserConversations(req.params.userId!);
     res.status(200).json({ conversations });

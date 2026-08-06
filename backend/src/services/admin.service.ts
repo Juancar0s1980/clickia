@@ -8,6 +8,7 @@ import { ApiError } from "../utils/ApiError";
 import { hashPassword } from "../utils/password";
 import { networkStatusService } from "./networkStatus.service";
 import { NetworkServiceStatus } from "../models/networkStatus.model";
+import { createUserByAdminSchema } from "../validators/admin.validator";
 
 const TOP_PROBLEMS_LIMIT = 10;
 
@@ -40,6 +41,43 @@ export const adminService = {
   async listUsers(): Promise<PublicUser[]> {
     const users = await userRepository.findAll();
     return users.map(toPublicUser);
+  },
+
+  // Carga masiva (CSV importado y parseado en el frontend). Cada fila se valida y se
+  // procesa de forma independiente: una fila invalida (email duplicado, columnas mal
+  // formadas) no debe tumbar el resto del lote.
+  async bulkCreateUsers(
+    rows: unknown[],
+  ): Promise<{ created: PublicUser[]; errors: Array<{ row: number; email: string; error: string }> }> {
+    const created: PublicUser[] = [];
+    const errors: Array<{ row: number; email: string; error: string }> = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const raw = rows[i];
+      const emailForError = (raw as { email?: string })?.email ?? "";
+      const parsed = createUserByAdminSchema.safeParse(raw);
+
+      if (!parsed.success) {
+        errors.push({
+          row: i + 1,
+          email: emailForError,
+          error: parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; "),
+        });
+        continue;
+      }
+
+      try {
+        created.push(await this.createUser(parsed.data));
+      } catch (err) {
+        errors.push({
+          row: i + 1,
+          email: parsed.data.email,
+          error: err instanceof ApiError ? err.message : "No se pudo crear el usuario",
+        });
+      }
+    }
+
+    return { created, errors };
   },
 
   async getUserConversations(userId: string) {

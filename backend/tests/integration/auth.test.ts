@@ -71,4 +71,38 @@ describe("Autenticación", () => {
   it("protege rutas privadas sin token", async () => {
     await request(app).get("/api/conversations").expect(401);
   });
+
+  describe("Cambio de contraseña", () => {
+    it("rechaza el cambio sin autenticación", async () => {
+      await request(app)
+        .patch("/api/users/me/password")
+        .send({ currentPassword: "x", newPassword: "clave67890" })
+        .expect(401);
+    });
+
+    it("rechaza la contraseña actual incorrecta", async () => {
+      const { accessToken } = await registerAndLogin("changepass-wrong");
+
+      const res = await request(app)
+        .patch("/api/users/me/password")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ currentPassword: "no-es-la-actual", newPassword: "clave67890" })
+        .expect(401);
+
+      expect(res.body.error).toMatch(/no es correcta/i);
+    });
+
+    it("cambia la contraseña y permite iniciar sesión con la nueva", async () => {
+      const { email, accessToken } = await registerAndLogin("changepass-ok");
+
+      await request(app)
+        .patch("/api/users/me/password")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ currentPassword: "clave12345", newPassword: "clave67890" })
+        .expect(204);
+
+      await request(app).post("/api/auth/login").send({ email, password: "clave12345" }).expect(401);
+      await request(app).post("/api/auth/login").send({ email, password: "clave67890" }).expect(200);
+    });
+  });
 });

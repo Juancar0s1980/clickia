@@ -102,6 +102,40 @@ describe("Admin", () => {
     expect(chat.body.networkStatus).toMatchObject({ zone: "Norte", status: "falla", estimated_time: "45 minutos" });
   });
 
+  describe("Carga masiva de usuarios", () => {
+    it("rechaza a un usuario normal", async () => {
+      const { accessToken } = await registerAndLogin("bulk-plain");
+      await request(app)
+        .post("/api/admin/users/bulk")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ rows: [] })
+        .expect(403);
+    });
+
+    it("crea las filas válidas y reporta las inválidas por separado", async () => {
+      const admin = await registerAndLoginAsAdmin("bulk-admin");
+      const dupEmail = `bulk.dup.${Date.now()}@example.com`;
+
+      const res = await request(app)
+        .post("/api/admin/users/bulk")
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({
+          rows: [
+            { nombre: "Cliente Uno", email: `bulk.uno.${Date.now()}@example.com`, password: "clave12345", tipoServicio: "wifi" },
+            { nombre: "Cliente Dos", email: dupEmail, password: "clave12345", tipoServicio: "tv" },
+            { nombre: "Cliente Dos Repetido", email: dupEmail, password: "clave12345", tipoServicio: "tv" },
+            { nombre: "X", email: "correo-invalido", password: "123", tipoServicio: "wifi" },
+          ],
+        })
+        .expect(207);
+
+      expect(res.body.created).toHaveLength(2);
+      expect(res.body.errors).toHaveLength(2);
+      expect(res.body.errors[0].email).toBe(dupEmail);
+      expect(res.body.errors[1].row).toBe(4);
+    });
+  });
+
   describe("Estadísticas", () => {
     it("rechaza a un usuario normal", async () => {
       const { accessToken } = await registerAndLogin("stats-plain");

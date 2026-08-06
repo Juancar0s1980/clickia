@@ -85,4 +85,19 @@ export const authService = {
       await refreshTokenRepository.revoke(stored.id);
     }
   },
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw ApiError.notFound("Usuario no encontrado");
+    }
+
+    const matches = await comparePassword(currentPassword, user.password_hash);
+    if (!matches) {
+      throw ApiError.unauthorized("La contraseña actual no es correcta");
+    }
+
+    const newHash = await hashPassword(newPassword);
+    await userRepository.updatePasswordHash(userId, newHash);
+  },
 };

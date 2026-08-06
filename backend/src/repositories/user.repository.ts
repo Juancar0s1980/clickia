@@ -37,4 +37,8 @@ export const userRepository = {
   async setRole(id: string, role: UserRole): Promise<void> {
     await pool.query("UPDATE users SET role = $1, updated_at = now() WHERE id = $2", [role, id]);
   },
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
+    await pool.query("UPDATE users SET password_hash = $1, updated_at = now() WHERE id = $2", [passwordHash, id]);
+  },
 };
