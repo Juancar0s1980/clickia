@@ -77,6 +77,34 @@ describe("weatherService.getCurrent", () => {
     expect(result).toBeNull();
   });
 
+  it("reintenta una vez si Open-Meteo responde 429 (rate limit) y usa el resultado del reintento", async () => {
+    env.weatherEnabled = true;
+    const fetchSpy = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 429 })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ current: { temperature_2m: 21, precipitation: 0, weather_code: 2 } }),
+      });
+    global.fetch = fetchSpy as unknown as typeof fetch;
+
+    const result = await weatherService.getCurrent("Centro-retry-429");
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(result).toMatchObject({ zone: "Centro-retry-429", temperatureC: 21 });
+  });
+
+  it("se degrada a null si Open-Meteo sigue en 429 tras el reintento", async () => {
+    env.weatherEnabled = true;
+    const fetchSpy = jest.fn().mockResolvedValue({ ok: false, status: 429 });
+    global.fetch = fetchSpy as unknown as typeof fetch;
+
+    const result = await weatherService.getCurrent("Centro-still-429");
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(result).toBeNull();
+  });
+
   it("cachea el resultado por zona: pedidos repetidos no vuelven a llamar a la red", async () => {
     env.weatherEnabled = true;
     const fetchSpy = mockFetchOnce({

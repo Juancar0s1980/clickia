@@ -94,8 +94,19 @@ export const weatherService = {
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
       "&current=temperature_2m,precipitation,weather_code&timezone=America%2FBogota";
 
+    // Un User-Agent identificable evita que Open-Meteo trate el trafico como anonimo/scraper.
+    // En hosting compartido (Render free tier: muchas apps de distintos clientes salen por el
+    // mismo pool de IPs) el limite por IP se puede agotar entre todos los inquilinos, no solo
+    // por nuestro trafico -- un 429 ahi es un limite externo, no un bug local. Un reintento
+    // corto es la unica mitigacion posible desde el codigo (el bucket se recarga por minuto).
+    const fetchOptions = { headers: { "User-Agent": "ClickIA-DobleClick/1.0 (soporte tecnico ISP)" } };
+
     try {
-      const res = await withTimeout(fetch(url), 4000, "open-meteo forecast");
+      let res = await withTimeout(fetch(url, fetchOptions), 4000, "open-meteo forecast");
+      if (res.status === 429) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        res = await withTimeout(fetch(url, fetchOptions), 4000, "open-meteo forecast (retry)");
+      }
       if (!res.ok) {
         logger.warn({ zone, status: res.status }, "weather.service: respuesta no-OK de Open-Meteo");
         return null;

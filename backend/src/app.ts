@@ -24,32 +24,7 @@ export function createApp(): Express {
   app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === "/health" } }));
 
   app.get("/health", (_req, res) => {
-    res.status(200).json({ status: "ok", nodeVersion: process.version });
-  });
-
-  // Diagnostico temporal: expone el error real (no el que weather.service.ts silencia)
-  // de un fetch saliente desde el contenedor de Render, para confirmar si el problema
-  // es de red egress/DNS/TLS o algo especifico de Open-Meteo.
-  app.get("/debug/fetch-test", async (_req, res) => {
-    const results: Record<string, unknown> = {};
-    for (const [name, url] of Object.entries({
-      openMeteo: "https://api.open-meteo.com/v1/forecast?latitude=2.44&longitude=-76.61&current=temperature_2m",
-      ipApi: "http://ip-api.com/json/8.8.8.8",
-      httpbin: "https://httpbin.org/get",
-    })) {
-      try {
-        const start = Date.now();
-        const r = await fetch(url);
-        results[name] = { ok: r.ok, status: r.status, ms: Date.now() - start };
-      } catch (err) {
-        results[name] = {
-          error: err instanceof Error ? err.message : String(err),
-          name: err instanceof Error ? err.name : undefined,
-          cause: err instanceof Error && err.cause ? String(err.cause) : undefined,
-        };
-      }
-    }
-    res.status(200).json(results);
+    res.status(200).json({ status: "ok" });
   });
 
   app.use("/api", apiRateLimiter, routes);

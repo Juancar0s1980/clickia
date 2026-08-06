@@ -189,6 +189,16 @@ El registro de usuario exige la dirección de la casa del cliente
 `Centro|Norte|Sur|Occidente|Timbío`) — así el admin puede indicarle rápido a
 un técnico a qué sector ir sin tener que leer la dirección completa.
 
+**Nota sobre `/api/weather` en producción (Render free tier):** Open-Meteo
+limita peticiones por IP; el plan gratuito de Render comparte un pool de
+salida entre todas las apps de todos sus usuarios, así que ese límite se
+puede agotar por tráfico ajeno y no solo el nuestro (`weather.service.ts`
+lo confirmó devolviendo 429). Se mitiga con un `User-Agent` identificable y
+un reintento corto (1.5 s) ante un 429, pero un límite compartido externo
+no se puede eliminar del todo desde el código — por diseño, el chat se
+degrada sin romperse si el clima no está disponible (es una señal extra,
+no una dependencia dura).
+
 ## Seguridad (Fase 6)
 
 - **Helmet**: cabeceras de seguridad estándar (`X-Content-Type-Options`,
