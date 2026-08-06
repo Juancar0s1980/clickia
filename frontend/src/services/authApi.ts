@@ -8,7 +8,13 @@ export interface LoginResult {
 }
 
 export const authApi = {
-  async register(input: { nombre: string; email: string; password: string; telefono?: string }): Promise<User> {
+  async register(input: {
+    nombre: string;
+    email: string;
+    password: string;
+    direccion: string;
+    telefono?: string;
+  }): Promise<User> {
     const { data } = await httpClient.post<{ user: User }>("/users", input);
     return data.user;
   },

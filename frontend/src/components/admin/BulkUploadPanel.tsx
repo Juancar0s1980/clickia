@@ -58,7 +58,8 @@ export function BulkUploadPanel({ isSubmitting, onUpload, onCancel }: BulkUpload
         </button>
       </div>
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        Columnas requeridas: nombre, email, password, telefono (opcional), tipoServicio (wifi, tv o wifi_tv).
+        Columnas requeridas: nombre, email, password, direccion, telefono (opcional), tipoServicio (wifi, tv o
+        wifi_tv).
       </p>
 
       <input

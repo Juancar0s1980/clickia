@@ -27,7 +27,10 @@ export async function registerAndLogin(prefix = "user"): Promise<RegisteredUser>
   const email = uniqueEmail(prefix);
   const password = "clave12345";
 
-  await request(app).post("/api/users").send({ nombre: "Usuario de Prueba", email, password }).expect(201);
+  await request(app)
+    .post("/api/users")
+    .send({ nombre: "Usuario de Prueba", email, password, direccion: "Calle 5 # 10-20, Popayán" })
+    .expect(201);
 
   const loginRes = await request(app).post("/api/auth/login").send({ email, password }).expect(200);
 

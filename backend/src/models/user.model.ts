@@ -7,6 +7,7 @@ export interface User {
   email: string;
   password_hash: string;
   telefono: string | null;
+  direccion: string;
   role: UserRole;
   tipo_servicio: TipoServicio;
   activo: boolean;

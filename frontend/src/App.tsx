@@ -12,6 +12,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { PlansPage } from "./pages/PlansPage";
 import { RegisterPage } from "./pages/RegisterPage";
 
 export function App() {
@@ -26,6 +27,7 @@ export function App() {
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/planes" element={<PlansPage />} />
 
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminUsersPage />} />

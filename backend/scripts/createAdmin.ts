@@ -29,7 +29,8 @@ async function main(): Promise<void> {
     console.log(`Usuario existente '${email}' promovido a admin.`);
   } else {
     const passwordHash = await hashPassword(password);
-    await userRepository.create({ nombre, email, passwordHash, role: "admin" });
+    // El admin no es cliente del ISP, no aplica una direccion de instalacion.
+    await userRepository.create({ nombre, email, passwordHash, direccion: "", role: "admin" });
     console.log(`Usuario admin '${email}' creado.`);
   }
 

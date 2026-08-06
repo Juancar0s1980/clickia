@@ -1,7 +1,7 @@
 import { BulkUserRow } from "./adminApi";
 import { TipoServicio } from "../types/api";
 
-const EXPECTED_HEADERS = ["nombre", "email", "password", "telefono", "tipoServicio"];
+const EXPECTED_HEADERS = ["nombre", "email", "password", "direccion", "telefono", "tipoServicio"];
 const VALID_SERVICES: TipoServicio[] = ["wifi", "tv", "wifi_tv"];
 
 export interface ParsedCsvResult {
@@ -48,6 +48,7 @@ export function parseUsersCsv(text: string): ParsedCsvResult {
       nombre: record.nombre ?? "",
       email: record.email ?? "",
       password: record.password ?? "",
+      direccion: record.direccion ?? "",
       telefono: record.telefono || undefined,
       tipoServicio,
     });
@@ -58,8 +59,8 @@ export function parseUsersCsv(text: string): ParsedCsvResult {
 
 export function usersCsvTemplate(): string {
   return [
-    "nombre,email,password,telefono,tipoServicio",
-    "Juan Pérez,juan.perez@example.com,clave12345,3001234567,wifi",
-    "Ana Gómez,ana.gomez@example.com,clave12345,,tv",
+    "nombre,email,password,direccion,telefono,tipoServicio",
+    "Juan Pérez,juan.perez@example.com,clave12345,Calle 5 # 10-20 Popayán,3001234567,wifi",
+    "Ana Gómez,ana.gomez@example.com,clave12345,Carrera 9 # 4-30 Timbío,,tv",
   ].join("\n");
 }

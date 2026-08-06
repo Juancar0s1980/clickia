@@ -1,5 +1,6 @@
 import { solutionRepository } from "../repositories/solution.repository";
 import { technicalProblemRepository } from "../repositories/technicalProblem.repository";
+import { Message } from "../models/message.model";
 import { TechnicalProblem } from "../models/technicalProblem.model";
 import { knowledgeBaseService } from "./knowledgeBase.service";
 
@@ -56,5 +57,19 @@ describe("knowledgeBaseService.findRelevantProblem", () => {
   it("elige el problema con mayor puntaje cuando hay varias coincidencias parciales", async () => {
     const match = await knowledgeBaseService.findRelevantProblem("wifi lento y con mala velocidad");
     expect(match?.problem.id).toBe("p-wifi");
+  });
+
+  it("mantiene el hilo del diagnóstico usando el historial cuando el mensaje de seguimiento no trae señales propias", async () => {
+    const history: Message[] = [
+      { id: "m1", conversation_id: "c1", sender: "user", message: "mi router tiene una luz roja", timestamp: new Date() },
+      { id: "m2", conversation_id: "c1", sender: "ai", message: "Pasos recomendados...", timestamp: new Date() },
+    ];
+    const match = await knowledgeBaseService.findRelevantProblem("sigue sin funcionar", history);
+    expect(match?.problem.id).toBe("p-router");
+  });
+
+  it("sin historial relevante, un mensaje de seguimiento ambiguo sigue sin dar match (no inventa un problema)", async () => {
+    const match = await knowledgeBaseService.findRelevantProblem("sigue sin funcionar");
+    expect(match).toBeNull();
   });
 });

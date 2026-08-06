@@ -33,6 +33,7 @@ export interface BulkUserRow {
   nombre: string;
   email: string;
   password: string;
+  direccion: string;
   telefono?: string;
   tipoServicio: TipoServicio;
 }
@@ -42,6 +43,7 @@ export const adminApi = {
     nombre: string;
     email: string;
     password: string;
+    direccion: string;
     telefono?: string;
     tipoServicio: TipoServicio;
   }): Promise<User> {

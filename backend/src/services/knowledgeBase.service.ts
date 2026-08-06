@@ -1,16 +1,15 @@
 import { solutionRepository } from "../repositories/solution.repository";
 import { technicalProblemRepository } from "../repositories/technicalProblem.repository";
+import { Message } from "../models/message.model";
 import { Solution } from "../models/solution.model";
 import { TechnicalProblem } from "../models/technicalProblem.model";
+import { tokenize as baseTokenize } from "../utils/text";
 
 export interface KnowledgeMatch {
   problem: TechnicalProblem;
   solutions: Solution[];
   score: number;
 }
-
-const COMBINING_MARK_MIN = 0x0300;
-const COMBINING_MARK_MAX = 0x036f;
 
 // Palabras demasiado comunes en espanol como para ser una senal util de que problema
 // describe el usuario; sin este filtro coinciden por casualidad con casi cualquier
@@ -22,19 +21,8 @@ const STOPWORDS = new Set([
   "duda", "favor", "gracias", "ayuda", "ayudar",
 ]);
 
-function normalize(text: string): string {
-  return Array.from(text.toLowerCase().normalize("NFD"))
-    .filter((ch) => {
-      const code = ch.codePointAt(0)!;
-      return code < COMBINING_MARK_MIN || code > COMBINING_MARK_MAX;
-    })
-    .join("");
-}
-
 function tokenize(text: string): string[] {
-  return normalize(text)
-    .split(/[^a-z0-9]+/)
-    .filter((t) => t.length > 2 && !STOPWORDS.has(t));
+  return baseTokenize(text, 3).filter((t) => !STOPWORDS.has(t));
 }
 
 function scoreProblem(problem: TechnicalProblem, wordSet: Set<string>): number {
@@ -48,25 +36,38 @@ function scoreProblem(problem: TechnicalProblem, wordSet: Set<string>): number {
   return score;
 }
 
+function bestMatch(problems: TechnicalProblem[], tokens: Set<string>): { problem: TechnicalProblem; score: number } | null {
+  if (tokens.size === 0) {
+    return null;
+  }
+  let best: { problem: TechnicalProblem; score: number } | null = null;
+  for (const problem of problems) {
+    const score = scoreProblem(problem, tokens);
+    if (score > 0 && (!best || score > best.score)) {
+      best = { problem, score };
+    }
+  }
+  return best;
+}
+
 // Paso de "Retrieval" del flujo RAG (Fase 4 anade la generacion sobre este contexto).
 // Coincidencia por palabra completa (no substring) para evitar falsos positivos con
 // palabras cortas o comunes.
 export const knowledgeBaseService = {
-  async findRelevantProblem(userMessage: string): Promise<KnowledgeMatch | null> {
-    const tokens = new Set(tokenize(userMessage));
-
-    if (tokens.size === 0) {
-      return null;
-    }
-
+  async findRelevantProblem(userMessage: string, history: Message[] = []): Promise<KnowledgeMatch | null> {
     const problems = await technicalProblemRepository.findAll();
-    let best: { problem: TechnicalProblem; score: number } | null = null;
 
-    for (const problem of problems) {
-      const score = scoreProblem(problem, tokens);
-      if (score > 0 && (!best || score > best.score)) {
-        best = { problem, score };
-      }
+    let best = bestMatch(problems, new Set(tokenize(userMessage)));
+
+    // Mensajes de seguimiento como "sigue sin funcionar" no traen señales propias del
+    // problema; se reintenta sumando los mensajes previos del usuario en la misma
+    // conversación para no perder el hilo del diagnóstico ya iniciado.
+    if (!best && history.length > 0) {
+      const priorUserText = history
+        .filter((m) => m.sender === "user")
+        .map((m) => m.message)
+        .join(" ");
+      best = bestMatch(problems, new Set(tokenize(`${priorUserText} ${userMessage}`)));
     }
 
     if (!best) {

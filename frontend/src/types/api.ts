@@ -6,6 +6,7 @@ export interface User {
   nombre: string;
   email: string;
   telefono: string | null;
+  direccion: string;
   role: UserRole;
   tipo_servicio: TipoServicio;
   activo: boolean;
@@ -78,6 +79,31 @@ export interface ChatResponse {
   matchedProblem: TechnicalProblem | null;
   networkStatus: NetworkStatus;
   source: string;
+}
+
+export type PlanCategoria = "doble" | "triple";
+
+export interface Plan {
+  id: string;
+  numero: number;
+  categoria: PlanCategoria;
+  nombre: string;
+  velocidad_mb: number;
+  incluye_tv: boolean;
+  tv_canales: number | null;
+  moviles_gb: number | null;
+  precio_mensual: number | null;
+  nota: string;
+  activo: boolean;
+}
+
+export interface Weather {
+  zone: string;
+  temperatureC: number;
+  precipitationMm: number;
+  weatherCode: number;
+  description: string;
+  isSevere: boolean;
 }
 
 export interface ApiErrorBody {

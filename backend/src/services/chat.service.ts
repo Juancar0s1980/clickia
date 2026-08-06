@@ -5,6 +5,9 @@ import { ApiError } from "../utils/ApiError";
 import { generateAiReply } from "./ai/aiReply.service";
 import { knowledgeBaseService } from "./knowledgeBase.service";
 import { networkStatusService } from "./networkStatus.service";
+import { planService } from "./plan.service";
+import { OFF_TOPIC_REPLY, topicGuardService } from "./topicGuard.service";
+import { weatherService } from "./weather.service";
 
 export const chatService = {
   async sendMessage(input: {
@@ -21,12 +24,38 @@ export const chatService = {
       throw ApiError.notFound("Conversación no encontrada");
     }
 
+    // Se lee el historial ANTES de guardar el mensaje actual, para no duplicarlo: el mensaje
+    // actual viaja aparte como "MENSAJE ACTUAL" en el prompt / se evalua por separado.
+    const history = await messageRepository.listByConversation(conversation.id);
+
     await messageRepository.create(conversation.id, "user", input.message);
 
-    // Flujo de diagnostico: clasificar -> consultar base de conocimiento -> consultar estado del servicio -> generar respuesta (RAG).
-    const match = await knowledgeBaseService.findRelevantProblem(input.message);
+    // Filtro de tema ANTES de tocar la base de conocimiento o el LLM: si el mensaje no es
+    // sobre el servicio del ISP (ni continua una conversacion que ya lo era), se responde
+    // con un mensaje fijo y cordial sin gastar tokens del proveedor de IA.
+    if (!topicGuardService.isOnTopic(input.message, history)) {
+      const networkStatus = await networkStatusService.getStatus(input.zone);
+      const aiMessage = await messageRepository.create(conversation.id, "ai", OFF_TOPIC_REPLY);
+
+      return {
+        conversation,
+        reply: aiMessage,
+        matchedProblem: null,
+        networkStatus,
+        source: "off_topic",
+      };
+    }
+
+    // Flujo de diagnostico: clasificar (con memoria de la conversacion) -> consultar estado del
+    // servicio -> consultar planes si aplica -> generar respuesta (RAG).
+    const match = await knowledgeBaseService.findRelevantProblem(input.message, history);
     const networkStatus = await networkStatusService.getStatus(input.zone);
-    const aiReply = await generateAiReply(input.message, match, networkStatus);
+    const plans = await planService.findRelevantPlans(input.message, history);
+    // El clima solo aporta como señal para un problema tecnico real (no para consultas de
+    // cuenta/comerciales como "mejorar mi plan"), asi que solo se consulta en ese caso.
+    const weather =
+      match && match.problem.categoria !== "cuenta" ? await weatherService.getCurrent(networkStatus.zone) : null;
+    const aiReply = await generateAiReply(input.message, match, networkStatus, plans, history, weather);
 
     const aiMessage = await messageRepository.create(conversation.id, "ai", aiReply.text);
 

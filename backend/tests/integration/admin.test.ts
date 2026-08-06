@@ -21,7 +21,13 @@ describe("Admin", () => {
     const created = await request(app)
       .post("/api/admin/users")
       .set("Authorization", `Bearer ${admin.accessToken}`)
-      .send({ nombre: "Cliente Nuevo", email, password: "clave12345", tipoServicio: "tv" })
+      .send({
+        nombre: "Cliente Nuevo",
+        email,
+        password: "clave12345",
+        direccion: "Carrera 9 # 4-30, Popayán",
+        tipoServicio: "tv",
+      })
       .expect(201);
 
     expect(created.body.user.tipo_servicio).toBe("tv");
@@ -45,6 +51,7 @@ describe("Admin", () => {
         nombre: "Cliente",
         email: `x.${Date.now()}@example.com`,
         password: "clave12345",
+        direccion: "Carrera 9 # 4-30, Popayán",
         tipoServicio: "satelital",
       })
       .expect(400);
@@ -121,9 +128,21 @@ describe("Admin", () => {
         .set("Authorization", `Bearer ${admin.accessToken}`)
         .send({
           rows: [
-            { nombre: "Cliente Uno", email: `bulk.uno.${Date.now()}@example.com`, password: "clave12345", tipoServicio: "wifi" },
-            { nombre: "Cliente Dos", email: dupEmail, password: "clave12345", tipoServicio: "tv" },
-            { nombre: "Cliente Dos Repetido", email: dupEmail, password: "clave12345", tipoServicio: "tv" },
+            {
+              nombre: "Cliente Uno",
+              email: `bulk.uno.${Date.now()}@example.com`,
+              password: "clave12345",
+              direccion: "Calle 1 # 2-30, Popayán",
+              tipoServicio: "wifi",
+            },
+            { nombre: "Cliente Dos", email: dupEmail, password: "clave12345", direccion: "Calle 1 # 2-30, Popayán", tipoServicio: "tv" },
+            {
+              nombre: "Cliente Dos Repetido",
+              email: dupEmail,
+              password: "clave12345",
+              direccion: "Calle 1 # 2-30, Popayán",
+              tipoServicio: "tv",
+            },
             { nombre: "X", email: "correo-invalido", password: "123", tipoServicio: "wifi" },
           ],
         })

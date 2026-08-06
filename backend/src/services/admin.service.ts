@@ -19,6 +19,7 @@ export const adminService = {
     nombre: string;
     email: string;
     password: string;
+    direccion: string;
     telefono?: string;
     tipoServicio: TipoServicio;
   }): Promise<PublicUser> {
@@ -32,6 +33,7 @@ export const adminService = {
       nombre: input.nombre,
       email: input.email,
       passwordHash,
+      direccion: input.direccion,
       telefono: input.telefono,
       role: "user",
       tipoServicio: input.tipoServicio,

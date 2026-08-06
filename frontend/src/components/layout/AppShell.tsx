@@ -24,9 +24,14 @@ export function AppShell() {
             Panel
           </NavLink>
           {!isAdmin && (
-            <NavLink to="/chat" className={NAV_LINK_CLASS}>
-              Chat
-            </NavLink>
+            <>
+              <NavLink to="/chat" className={NAV_LINK_CLASS}>
+                Chat
+              </NavLink>
+              <NavLink to="/planes" className={NAV_LINK_CLASS}>
+                Planes
+              </NavLink>
+            </>
           )}
           {isAdmin && (
             <>

@@ -12,6 +12,7 @@ const EXISTING_USER: User = {
   nombre: "Cliente Existente",
   email: "cliente@example.com",
   telefono: null,
+  direccion: "Calle 5 # 10-20, Popayán",
   role: "user",
   tipo_servicio: "wifi",
   activo: true,
@@ -53,6 +54,7 @@ describe("AdminUsersPage", () => {
     await userEvent.type(screen.getByLabelText(/nombre completo/i), "Cliente Nuevo");
     await userEvent.type(screen.getByLabelText(/correo electrónico/i), "nuevo@example.com");
     await userEvent.type(screen.getByLabelText(/^contraseña$/i), "clave12345");
+    await userEvent.type(screen.getByLabelText(/dirección de instalación/i), "Carrera 9 # 4-30, Popayán");
     await userEvent.selectOptions(screen.getByLabelText(/tipo de servicio/i), "tv");
 
     await userEvent.click(screen.getByRole("button", { name: "Crear usuario" }));
@@ -63,6 +65,7 @@ describe("AdminUsersPage", () => {
           nombre: "Cliente Nuevo",
           email: "nuevo@example.com",
           password: "clave12345",
+          direccion: "Carrera 9 # 4-30, Popayán",
           tipoServicio: "tv",
         }),
       ),

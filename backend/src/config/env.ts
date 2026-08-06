@@ -23,6 +23,10 @@ export const env = {
   // "gemini" | "groq" | "" (vacio = autodetectar segun que API key este configurada)
   aiProvider: process.env.AI_PROVIDER ?? "",
 
+  // Open-Meteo no usa API key, asi que no hay credencial que gatillar; este flag existe
+  // para poder desactivarlo en tests (deterministas, sin red) igual que las API keys de IA.
+  weatherEnabled: process.env.WEATHER_ENABLED !== "false",
+
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
   rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 300),
   authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 10),

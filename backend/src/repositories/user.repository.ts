@@ -16,15 +16,24 @@ export const userRepository = {
     nombre: string;
     email: string;
     passwordHash: string;
+    direccion: string;
     telefono?: string;
     role?: UserRole;
     tipoServicio?: TipoServicio;
   }): Promise<User> {
     const { rows } = await pool.query<User>(
-      `INSERT INTO users (nombre, email, password_hash, telefono, role, tipo_servicio)
-       VALUES ($1, $2, $3, $4, COALESCE($5, 'user'), COALESCE($6, 'wifi'))
+      `INSERT INTO users (nombre, email, password_hash, direccion, telefono, role, tipo_servicio)
+       VALUES ($1, $2, $3, $4, $5, COALESCE($6, 'user'), COALESCE($7, 'wifi'))
        RETURNING *`,
-      [input.nombre, input.email, input.passwordHash, input.telefono ?? null, input.role ?? null, input.tipoServicio ?? null],
+      [
+        input.nombre,
+        input.email,
+        input.passwordHash,
+        input.direccion,
+        input.telefono ?? null,
+        input.role ?? null,
+        input.tipoServicio ?? null,
+      ],
     );
     return rows[0]!;
   },

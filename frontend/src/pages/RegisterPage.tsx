@@ -15,6 +15,7 @@ const registerSchema = z.object({
   nombre: z.string().min(2, "Ingresa tu nombre completo"),
   email: z.string().min(1, "Ingresa tu correo").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
+  direccion: z.string().min(5, "Ingresa la dirección de instalación"),
   telefono: z.string().optional(),
 });
 
@@ -68,6 +69,12 @@ export function RegisterPage() {
             autoComplete="new-password"
             error={errors.password?.message}
             {...register("password")}
+          />
+          <Input
+            label="Dirección de instalación"
+            autoComplete="street-address"
+            error={errors.direccion?.message}
+            {...register("direccion")}
           />
           <Input label="Teléfono (opcional)" type="tel" autoComplete="tel" {...register("telefono")} />
 

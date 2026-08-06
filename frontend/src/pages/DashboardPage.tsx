@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkStatusBadge } from "../components/chat/NetworkStatusBadge";
+import { WeatherBadge } from "../components/chat/WeatherBadge";
 import { TicketStatusBadge } from "../components/tickets/TicketStatusBadge";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
@@ -10,6 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import { useConversations } from "../hooks/useConversations";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { useTickets } from "../hooks/useTickets";
+import { useWeather } from "../hooks/useWeather";
 import { zoneStorage } from "../services/zoneStorage";
 import { TipoServicio } from "../types/api";
 import { AdminStatsPage } from "./admin/AdminStatsPage";
@@ -31,6 +33,7 @@ export function DashboardPage() {
   }
 
   const { data: status, isLoading: isStatusLoading } = useNetworkStatus(zone);
+  const { data: weather } = useWeather(zone);
   const { data: conversations, isLoading: isConversationsLoading } = useConversations();
   const { data: tickets, isLoading: isTicketsLoading } = useTickets();
 
@@ -70,7 +73,10 @@ export function DashboardPage() {
             ))}
           </select>
         </div>
-        {isStatusLoading || !status ? <Spinner size="sm" /> : <NetworkStatusBadge status={status} />}
+        <div className="flex flex-wrap items-center gap-2">
+          {isStatusLoading || !status ? <Spinner size="sm" /> : <NetworkStatusBadge status={status} />}
+          {weather && <WeatherBadge weather={weather} />}
+        </div>
       </Card>
 
       <Card className="p-5">

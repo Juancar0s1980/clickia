@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { ChangePasswordModal } from "../components/account/ChangePasswordModal";
 import { ChatBubble } from "../components/chat/ChatBubble";
 import { ChatInput } from "../components/chat/ChatInput";
@@ -181,6 +181,12 @@ export function ChatPage() {
               >
                 Cambiar contraseña
               </button>
+              <Link
+                to="/planes"
+                className="rounded-full border border-accent bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/20 dark:border-lime-400 dark:bg-lime-400/10 dark:text-lime-300 dark:hover:bg-lime-400/20"
+              >
+                Ver todos los planes
+              </Link>
               <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">
                 Zona: {zone} ·{" "}
                 <button type="button" onClick={() => setZone(null)} className="text-primary hover:underline dark:text-blue-300">

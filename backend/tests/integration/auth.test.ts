@@ -7,7 +7,7 @@ describe("Autenticación", () => {
 
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Ana Pérez", email, password: "clave12345" })
+      .send({ nombre: "Ana Pérez", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán" })
       .expect(201);
 
     expect(res.body.user).toMatchObject({ nombre: "Ana Pérez", email });
@@ -19,7 +19,7 @@ describe("Autenticación", () => {
 
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Otro", email, password: "clave12345" })
+      .send({ nombre: "Otro", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán" })
       .expect(409);
 
     expect(res.body.error).toMatch(/ya existe/i);
@@ -34,10 +34,22 @@ describe("Autenticación", () => {
     expect(res.body.error).toBeDefined();
   });
 
+  it("exige la dirección de instalación", async () => {
+    const res = await request(app)
+      .post("/api/users")
+      .send({ nombre: "Sin Dirección", email: `sindireccion.${Date.now()}@example.com`, password: "clave12345" })
+      .expect(400);
+
+    expect(res.body.error).toBeDefined();
+  });
+
   it("inicia sesión con credenciales correctas", async () => {
     const email = `login.${Date.now()}@example.com`;
     const password = "clave12345";
-    await request(app).post("/api/users").send({ nombre: "Login Test", email, password }).expect(201);
+    await request(app)
+      .post("/api/users")
+      .send({ nombre: "Login Test", email, password, direccion: "Calle 5 # 10-20, Popayán" })
+      .expect(201);
 
     const res = await request(app).post("/api/auth/login").send({ email, password }).expect(200);
 

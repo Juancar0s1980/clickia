@@ -76,6 +76,76 @@ describe("Chat", () => {
       .expect(404);
   });
 
+  it("recuerda el problema entre turnos y sugiere crear un ticket en vez de repetir los mismos pasos", async () => {
+    const { accessToken } = await registerAndLogin("chat-memoria");
+
+    const first = await request(app)
+      .post("/api/chat")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ message: "No tengo internet en ningún dispositivo", zone: "Centro" })
+      .expect(200);
+
+    expect(first.body.reply.message).toMatch(/Pasos recomendados/);
+    const conversationId = first.body.conversation.id;
+
+    const second = await request(app)
+      .post("/api/chat")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ conversationId, message: "Ya intenté eso y sigue sin funcionar" })
+      .expect(200);
+
+    // El segundo mensaje ("sigue sin funcionar") no trae señales propias del problema:
+    // debe reconocerlo via el historial y, como ya se dieron pasos, ofrecer un ticket
+    // en vez de repetir el mismo diagnóstico o pedir más detalle.
+    expect(second.body.matchedProblem?.nombre).toBe("Internet sin conexión");
+    expect(second.body.reply.message).toMatch(/crear un ticket de soporte/i);
+    expect(second.body.reply.message).not.toMatch(/Pasos recomendados/);
+  });
+
+  it("responde con precios reales del catálogo cuando preguntan por planes (fallback, sin LLM configurado)", async () => {
+    const { accessToken } = await registerAndLogin("chat-plans");
+
+    const res = await request(app)
+      .post("/api/chat")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ message: "¿Cuánto cuesta el plan de 300 megas con TV?" })
+      .expect(200);
+
+    expect(res.body.reply.message).toMatch(/Combo Internet 300 Mb \+ TV: \$100.000\/mes/);
+  });
+
+  it("responde con un mensaje fijo y cordial ante preguntas fuera de tema, sin generar un diagnóstico", async () => {
+    const { accessToken } = await registerAndLogin("chat-offtopic");
+
+    const res = await request(app)
+      .post("/api/chat")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ message: "¿Cuál es la capital de Francia?" })
+      .expect(200);
+
+    expect(res.body.source).toBe("off_topic");
+    expect(res.body.matchedProblem).toBeNull();
+    expect(res.body.reply.message).toMatch(/solo puedo ayudarte con temas de tu servicio/i);
+  });
+
+  it("un seguimiento fuera de tema dentro de una conversación de soporte sigue el diagnóstico en curso", async () => {
+    const { accessToken } = await registerAndLogin("chat-offtopic-followup");
+
+    const first = await request(app)
+      .post("/api/chat")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ message: "No tengo internet en ningún dispositivo", zone: "Centro" })
+      .expect(200);
+
+    const second = await request(app)
+      .post("/api/chat")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({ conversationId: first.body.conversation.id, message: "Ya intenté eso y sigue sin funcionar" })
+      .expect(200);
+
+    expect(second.body.source).not.toBe("off_topic");
+  });
+
   describe("AI Guard", () => {
     it("bloquea intentos de prompt injection", async () => {
       const { accessToken } = await registerAndLogin("guard-injection");

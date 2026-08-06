@@ -16,6 +16,7 @@ const schema = z.object({
   nombre: z.string().trim().min(2, "Ingresa el nombre completo"),
   email: z.string().trim().email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
+  direccion: z.string().trim().min(5, "Ingresa la dirección de instalación"),
   telefono: z.string().trim().optional(),
   tipoServicio: z.enum(["wifi", "tv", "wifi_tv"]),
 });
@@ -44,6 +45,7 @@ export function CreateUserForm({ isSubmitting, error, onSubmit, onCancel }: Crea
         <Input label="Nombre completo" error={errors.nombre?.message} {...register("nombre")} />
         <Input label="Correo electrónico" type="email" error={errors.email?.message} {...register("email")} />
         <Input label="Contraseña" type="password" error={errors.password?.message} {...register("password")} />
+        <Input label="Dirección de instalación" error={errors.direccion?.message} {...register("direccion")} />
         <Input label="Teléfono (opcional)" type="tel" {...register("telefono")} />
       </div>
 
