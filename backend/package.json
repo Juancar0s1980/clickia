@@ -4,6 +4,9 @@
   "description": "API REST de ClickIA - asistente inteligente de soporte tecnico ISP",
   "main": "dist/server.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",

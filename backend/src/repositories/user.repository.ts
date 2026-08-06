@@ -1,5 +1,5 @@
 import { pool } from "../config/database";
-import { TipoServicio, User, UserRole } from "../models/user.model";
+import { TipoServicio, User, UserRole, Zona } from "../models/user.model";
 
 export const userRepository = {
   async findByEmail(email: string): Promise<User | null> {
@@ -18,6 +18,7 @@ export const userRepository = {
     passwordHash: string;
     direccion: string;
     telefono?: string;
+    zona?: Zona;
     role?: UserRole;
     tipoServicio?: TipoServicio;
     // Solo lo trae el registro propio (la persona aceptando por si misma); las cuentas
@@ -26,8 +27,8 @@ export const userRepository = {
   }): Promise<User> {
     const aceptoDatos = input.aceptoDatos ?? false;
     const { rows } = await pool.query<User>(
-      `INSERT INTO users (nombre, email, password_hash, direccion, telefono, role, tipo_servicio, acepto_datos, acepto_datos_at)
-       VALUES ($1, $2, $3, $4, $5, COALESCE($6, 'user'), COALESCE($7, 'wifi'), $8, CASE WHEN $8 THEN now() ELSE NULL END)
+      `INSERT INTO users (nombre, email, password_hash, direccion, telefono, zona, role, tipo_servicio, acepto_datos, acepto_datos_at)
+       VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'user'), COALESCE($8, 'wifi'), $9, CASE WHEN $9 THEN now() ELSE NULL END)
        RETURNING *`,
       [
         input.nombre,
@@ -35,6 +36,7 @@ export const userRepository = {
         input.passwordHash,
         input.direccion,
         input.telefono ?? null,
+        input.zona ?? null,
         input.role ?? null,
         input.tipoServicio ?? null,
         aceptoDatos,

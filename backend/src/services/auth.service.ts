@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { env } from "../config/env";
 import { refreshTokenRepository } from "../repositories/refreshToken.repository";
 import { userRepository } from "../repositories/user.repository";
-import { toPublicUser, PublicUser, User } from "../models/user.model";
+import { toPublicUser, PublicUser, User, Zona } from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
 import { signAccessToken } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/password";
@@ -31,6 +31,7 @@ export const authService = {
     email: string;
     password: string;
     direccion: string;
+    zona: Zona;
     telefono?: string;
     aceptoDatos: boolean;
   }): Promise<PublicUser> {
@@ -45,6 +46,7 @@ export const authService = {
       email: input.email,
       passwordHash,
       direccion: input.direccion,
+      zona: input.zona,
       telefono: input.telefono,
       aceptoDatos: input.aceptoDatos,
     });

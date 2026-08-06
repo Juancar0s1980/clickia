@@ -29,7 +29,14 @@ export async function registerAndLogin(prefix = "user"): Promise<RegisteredUser>
 
   await request(app)
     .post("/api/users")
-    .send({ nombre: "Usuario de Prueba", email, password, direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
+    .send({
+      nombre: "Usuario de Prueba",
+      email,
+      password,
+      direccion: "Calle 5 # 10-20, Popayán",
+      zona: "Centro",
+      aceptoDatos: true,
+    })
     .expect(201);
 
   const loginRes = await request(app).post("/api/auth/login").send({ email, password }).expect(200);

@@ -13,6 +13,7 @@ export const authApi = {
     email: string;
     password: string;
     direccion: string;
+    zona: string;
     telefono?: string;
     aceptoDatos: boolean;
   }): Promise<User> {

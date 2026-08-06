@@ -8,6 +8,7 @@ import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { Input } from "../components/ui/Input";
 import { Logo } from "../components/ui/Logo";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
+import { ZONES } from "../constants/zones";
 import { authApi } from "../services/authApi";
 import { extractErrorMessage } from "../services/httpClient";
 
@@ -15,7 +16,8 @@ const registerSchema = z.object({
   nombre: z.string().min(2, "Ingresa tu nombre completo"),
   email: z.string().min(1, "Ingresa tu correo").email("Correo inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
-  direccion: z.string().min(5, "Ingresa la dirección de instalación"),
+  direccion: z.string().min(5, "Ingresa la dirección de tu casa"),
+  zona: z.enum(ZONES, { errorMap: () => ({ message: "Selecciona la zona de tu casa" }) }),
   telefono: z.string().optional(),
   aceptoDatos: z.boolean().refine((v) => v === true, {
     message: "Debes aceptar el almacenamiento de tus datos y conversaciones para continuar",
@@ -35,7 +37,7 @@ export function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { aceptoDatos: false },
+    defaultValues: { aceptoDatos: false, zona: ZONES[0] },
   });
 
   async function onSubmit(values: RegisterFormValues) {
@@ -77,11 +79,33 @@ export function RegisterPage() {
             {...register("password")}
           />
           <Input
-            label="Dirección de instalación"
+            label="Dirección de tu casa"
             autoComplete="street-address"
             error={errors.direccion?.message}
             {...register("direccion")}
           />
+          <p className="-mt-3 text-xs text-slate-400 dark:text-slate-500">
+            La usamos para que un técnico pueda ubicarte si necesitas una visita presencial.
+          </p>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="zona" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Zona de tu casa
+            </label>
+            <select
+              id="zona"
+              {...register("zona")}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            >
+              {ZONES.map((zone) => (
+                <option key={zone} value={zone}>
+                  {zone}
+                </option>
+              ))}
+            </select>
+            {errors.zona && <p className="text-xs text-red-600 dark:text-red-400">{errors.zona.message}</p>}
+          </div>
+
           <Input label="Teléfono (opcional)" type="tel" autoComplete="tel" {...register("telefono")} />
 
           <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-900 dark:text-slate-400">

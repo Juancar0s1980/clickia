@@ -57,11 +57,19 @@ src/
 
 ## Pantallas agregadas después de la Fase 5
 
-- **Registro**: además de nombre/correo/contraseña/dirección/teléfono,
-  incluye el checkbox obligatorio de **consentimiento de almacenamiento de
-  datos** (bloquea el envío si no se acepta) y un botón de ojo para
-  mostrar/ocultar la contraseña (`Input.tsx`, aplica a cualquier campo
-  `type="password"` de la app).
+- **Registro**: además de nombre/correo/contraseña/teléfono, incluye el
+  checkbox obligatorio de **consentimiento de almacenamiento de datos**
+  (bloquea el envío si no se acepta) y un botón de ojo para mostrar/ocultar
+  la contraseña (`Input.tsx`, aplica a cualquier campo `type="password"` de
+  la app). La **dirección** ahora se pide explícitamente como "dirección de
+  tu casa" (para que un técnico pueda ubicarte en una visita presencial) y
+  se agregó un campo separado de **zona** (Centro/Norte/Sur/Occidente/
+  Timbío, mismo catálogo de `constants/zones.ts`) para que el admin ubique
+  rápido el sector sin leer la dirección completa; el admin también la
+  captura al crear un cliente (`CreateUserForm`) y por CSV, y se ve como
+  columna en la tabla de usuarios. La zona registrada se reutiliza como
+  zona por defecto del chat/dashboard (`AuthContext` la siembra en
+  `zoneStorage` al iniciar sesión), así no se vuelve a preguntar.
 - **Panel del cliente**: rediseñado en dos columnas (saludo + estado del
   servicio/clima a la derecha) y con el historial de conversaciones como
   contenido principal, con badge de color por estado. "Mis tickets" se

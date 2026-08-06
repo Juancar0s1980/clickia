@@ -1,10 +1,13 @@
 import { z } from "zod";
 
+export const ZONAS = ["Centro", "Norte", "Sur", "Occidente", "Timbío"] as const;
+
 export const registerSchema = z.object({
   nombre: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(255),
   password: z.string().min(8).max(72),
-  direccion: z.string().trim().min(5, "Ingresa la dirección de instalación").max(200),
+  direccion: z.string().trim().min(5, "Ingresa la dirección de tu casa").max(200),
+  zona: z.enum(ZONAS, { errorMap: () => ({ message: "Selecciona la zona de tu casa" }) }),
   telefono: z.string().trim().max(30).optional(),
   aceptoDatos: z.boolean().refine((v) => v === true, {
     message: "Debes aceptar el almacenamiento de tus datos y conversaciones para continuar",

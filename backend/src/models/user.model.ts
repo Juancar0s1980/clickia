@@ -1,5 +1,6 @@
 export type UserRole = "user" | "admin";
 export type TipoServicio = "wifi" | "tv" | "wifi_tv";
+export type Zona = "Centro" | "Norte" | "Sur" | "Occidente" | "Timbío";
 
 export interface User {
   id: string;
@@ -8,6 +9,7 @@ export interface User {
   password_hash: string;
   telefono: string | null;
   direccion: string;
+  zona: Zona | null;
   acepto_datos: boolean;
   acepto_datos_at: Date | null;
   role: UserRole;

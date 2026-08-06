@@ -7,7 +7,14 @@ describe("Autenticación", () => {
 
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Ana Pérez", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
+      .send({
+        nombre: "Ana Pérez",
+        email,
+        password: "clave12345",
+        direccion: "Calle 5 # 10-20, Popayán",
+        zona: "Centro",
+        aceptoDatos: true,
+      })
       .expect(201);
 
     expect(res.body.user).toMatchObject({ nombre: "Ana Pérez", email });
@@ -19,7 +26,14 @@ describe("Autenticación", () => {
 
     const res = await request(app)
       .post("/api/users")
-      .send({ nombre: "Otro", email, password: "clave12345", direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
+      .send({
+        nombre: "Otro",
+        email,
+        password: "clave12345",
+        direccion: "Calle 5 # 10-20, Popayán",
+        zona: "Centro",
+        aceptoDatos: true,
+      })
       .expect(409);
 
     expect(res.body.error).toMatch(/ya existe/i);
@@ -34,13 +48,30 @@ describe("Autenticación", () => {
     expect(res.body.error).toBeDefined();
   });
 
-  it("exige la dirección de instalación", async () => {
+  it("exige la dirección de la casa", async () => {
     const res = await request(app)
       .post("/api/users")
       .send({
         nombre: "Sin Dirección",
         email: `sindireccion.${Date.now()}@example.com`,
         password: "clave12345",
+        zona: "Centro",
+        aceptoDatos: true,
+      })
+      .expect(400);
+
+    expect(res.body.error).toBeDefined();
+  });
+
+  it("exige una zona válida", async () => {
+    const res = await request(app)
+      .post("/api/users")
+      .send({
+        nombre: "Sin Zona",
+        email: `sinzona.${Date.now()}@example.com`,
+        password: "clave12345",
+        direccion: "Calle 5 # 10-20, Popayán",
+        zona: "Noreste",
         aceptoDatos: true,
       })
       .expect(400);
@@ -56,6 +87,7 @@ describe("Autenticación", () => {
         email: `sinconsentimiento.${Date.now()}@example.com`,
         password: "clave12345",
         direccion: "Calle 5 # 10-20, Popayán",
+        zona: "Centro",
         aceptoDatos: false,
       })
       .expect(400);
@@ -68,7 +100,14 @@ describe("Autenticación", () => {
     const password = "clave12345";
     await request(app)
       .post("/api/users")
-      .send({ nombre: "Login Test", email, password, direccion: "Calle 5 # 10-20, Popayán", aceptoDatos: true })
+      .send({
+        nombre: "Login Test",
+        email,
+        password,
+        direccion: "Calle 5 # 10-20, Popayán",
+        zona: "Centro",
+        aceptoDatos: true,
+      })
       .expect(201);
 
     const res = await request(app).post("/api/auth/login").send({ email, password }).expect(200);

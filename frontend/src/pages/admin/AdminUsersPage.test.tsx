@@ -13,6 +13,7 @@ const EXISTING_USER: User = {
   email: "cliente@example.com",
   telefono: null,
   direccion: "Calle 5 # 10-20, Popayán",
+  zona: "Centro",
   acepto_datos: true,
   acepto_datos_at: "2026-01-01T10:00:00.000Z",
   role: "user",
@@ -56,8 +57,9 @@ describe("AdminUsersPage", () => {
     await userEvent.type(screen.getByLabelText(/nombre completo/i), "Cliente Nuevo");
     await userEvent.type(screen.getByLabelText(/correo electrónico/i), "nuevo@example.com");
     await userEvent.type(screen.getByLabelText(/^contraseña$/i), "clave12345");
-    await userEvent.type(screen.getByLabelText(/dirección de instalación/i), "Carrera 9 # 4-30, Popayán");
+    await userEvent.type(screen.getByLabelText(/dirección de la casa del cliente/i), "Carrera 9 # 4-30, Popayán");
     await userEvent.selectOptions(screen.getByLabelText(/tipo de servicio/i), "tv");
+    await userEvent.selectOptions(screen.getByLabelText(/zona del cliente/i), "Sur");
 
     await userEvent.click(screen.getByRole("button", { name: "Crear usuario" }));
 
@@ -68,6 +70,7 @@ describe("AdminUsersPage", () => {
           email: "nuevo@example.com",
           password: "clave12345",
           direccion: "Carrera 9 # 4-30, Popayán",
+          zona: "Sur",
           tipoServicio: "tv",
         }),
       ),

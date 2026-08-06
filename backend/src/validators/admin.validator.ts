@@ -1,10 +1,12 @@
 import { z } from "zod";
+import { ZONAS } from "./auth.validator";
 
 export const createUserByAdminSchema = z.object({
   nombre: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(255),
   password: z.string().min(8).max(72),
-  direccion: z.string().trim().min(5, "Ingresa la dirección de instalación").max(200),
+  direccion: z.string().trim().min(5, "Ingresa la dirección de la casa del cliente").max(200),
+  zona: z.enum(ZONAS, { errorMap: () => ({ message: "Selecciona la zona del cliente" }) }),
   telefono: z.string().trim().max(30).optional(),
   tipoServicio: z.enum(["wifi", "tv", "wifi_tv"]),
 });

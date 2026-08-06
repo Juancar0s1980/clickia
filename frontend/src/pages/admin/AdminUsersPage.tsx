@@ -28,6 +28,7 @@ export function AdminUsersPage() {
     email: string;
     password: string;
     direccion: string;
+    zona: string;
     telefono?: string;
     tipoServicio: TipoServicio;
   }) {
@@ -102,6 +103,8 @@ export function AdminUsersPage() {
               <tr>
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Correo</th>
+                <th className="px-4 py-3">Dirección</th>
+                <th className="px-4 py-3">Zona</th>
                 <th className="px-4 py-3">Servicio</th>
                 <th className="px-4 py-3">Rol</th>
                 <th className="px-4 py-3">Registrado</th>
@@ -116,6 +119,8 @@ export function AdminUsersPage() {
                 >
                   <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{u.nombre}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.email}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.direccion}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.zona ?? "—"}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{SERVICE_LABELS[u.tipo_servicio]}</td>
                   <td className="px-4 py-3 capitalize text-slate-600 dark:text-slate-300">{u.role}</td>
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400">

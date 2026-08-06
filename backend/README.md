@@ -51,7 +51,7 @@ Todos bajo el prefijo `/api`.
 | GET | `/api/network/status?zone=` | No | API ISP simulada (estado por zona) |
 | GET | `/api/plans` | Sí | Catálogo de planes (usado por el chat y por la página "Planes") |
 | GET | `/api/weather?zone=` | Sí | Clima actual de una zona (2da API externa) |
-| POST | `/api/admin/users` | Admin | Registra un cliente (con `tipoServicio`, `direccion`) |
+| POST | `/api/admin/users` | Admin | Registra un cliente (con `tipoServicio`, `direccion`, `zona`) |
 | POST | `/api/admin/users/bulk` | Admin | Carga masiva de clientes por CSV (parcial: reporta fila a fila) |
 | GET | `/api/admin/users` | Admin | Lista todos los usuarios registrados |
 | GET | `/api/admin/users/:userId/conversations` | Admin | Conversaciones de cualquier usuario |
@@ -181,10 +181,13 @@ una respuesta escrita para el cliente (`PATCH /api/admin/tickets/:id` con
 petición antes de tocar la base de datos. Se guarda `acepto_datos` +
 `acepto_datos_at` en `users`.
 
-**Zona Timbío y dirección de instalación:** además de las zonas/barrios de
-Popayán, `network_status` incluye Timbío (municipio vecino que DobleClick
-también atiende, con sus propias coordenadas para el clima). El registro
-de usuario exige una dirección de instalación (`direccion`).
+**Zona Timbío, dirección de casa y zona del cliente:** además de las
+zonas/barrios de Popayán, `network_status` incluye Timbío (municipio vecino
+que DobleClick también atiende, con sus propias coordenadas para el clima).
+El registro de usuario exige la dirección de la casa del cliente
+(`direccion`) y, por separado, su zona (`zona`, uno de
+`Centro|Norte|Sur|Occidente|Timbío`) — así el admin puede indicarle rápido a
+un técnico a qué sector ir sin tener que leer la dirección completa.
 
 ## Seguridad (Fase 6)
 
@@ -232,7 +235,7 @@ re-verificó en navegador con toda la seguridad activa, sin regresiones.
 
 ```bash
 curl -X POST localhost:4000/api/users -H "Content-Type: application/json" \
-  -d '{"nombre":"Juan","email":"juan@example.com","password":"clave12345","direccion":"Calle 5 # 10-20, Popayán","aceptoDatos":true}'
+  -d '{"nombre":"Juan","email":"juan@example.com","password":"clave12345","direccion":"Calle 5 # 10-20, Popayán","zona":"Centro","aceptoDatos":true}'
 
 curl -X POST localhost:4000/api/auth/login -H "Content-Type: application/json" \
   -d '{"email":"juan@example.com","password":"clave12345"}'

@@ -26,6 +26,7 @@ describe("Admin", () => {
         email,
         password: "clave12345",
         direccion: "Carrera 9 # 4-30, Popayán",
+        zona: "Sur",
         tipoServicio: "tv",
       })
       .expect(201);
@@ -52,6 +53,7 @@ describe("Admin", () => {
         email: `x.${Date.now()}@example.com`,
         password: "clave12345",
         direccion: "Carrera 9 # 4-30, Popayán",
+        zona: "Sur",
         tipoServicio: "satelital",
       })
       .expect(400);
@@ -133,14 +135,23 @@ describe("Admin", () => {
               email: `bulk.uno.${Date.now()}@example.com`,
               password: "clave12345",
               direccion: "Calle 1 # 2-30, Popayán",
+              zona: "Centro",
               tipoServicio: "wifi",
             },
-            { nombre: "Cliente Dos", email: dupEmail, password: "clave12345", direccion: "Calle 1 # 2-30, Popayán", tipoServicio: "tv" },
+            {
+              nombre: "Cliente Dos",
+              email: dupEmail,
+              password: "clave12345",
+              direccion: "Calle 1 # 2-30, Popayán",
+              zona: "Centro",
+              tipoServicio: "tv",
+            },
             {
               nombre: "Cliente Dos Repetido",
               email: dupEmail,
               password: "clave12345",
               direccion: "Calle 1 # 2-30, Popayán",
+              zona: "Centro",
               tipoServicio: "tv",
             },
             { nombre: "X", email: "correo-invalido", password: "123", tipoServicio: "wifi" },

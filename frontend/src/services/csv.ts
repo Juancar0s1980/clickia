@@ -1,8 +1,10 @@
 import { BulkUserRow } from "./adminApi";
+import { ZONES } from "../constants/zones";
 import { TipoServicio } from "../types/api";
 
-const EXPECTED_HEADERS = ["nombre", "email", "password", "direccion", "telefono", "tipoServicio"];
+const EXPECTED_HEADERS = ["nombre", "email", "password", "direccion", "zona", "telefono", "tipoServicio"];
 const VALID_SERVICES: TipoServicio[] = ["wifi", "tv", "wifi_tv"];
+const VALID_ZONES: string[] = [...ZONES];
 
 export interface ParsedCsvResult {
   rows: BulkUserRow[];
@@ -44,11 +46,17 @@ export function parseUsersCsv(text: string): ParsedCsvResult {
       continue;
     }
 
+    if (!VALID_ZONES.includes(record.zona)) {
+      parseErrors.push(`Fila ${i + 1}: zona inválida ("${record.zona}"), debe ser ${VALID_ZONES.join(", ")}`);
+      continue;
+    }
+
     rows.push({
       nombre: record.nombre ?? "",
       email: record.email ?? "",
       password: record.password ?? "",
       direccion: record.direccion ?? "",
+      zona: record.zona,
       telefono: record.telefono || undefined,
       tipoServicio,
     });
@@ -59,8 +67,8 @@ export function parseUsersCsv(text: string): ParsedCsvResult {
 
 export function usersCsvTemplate(): string {
   return [
-    "nombre,email,password,direccion,telefono,tipoServicio",
-    "Juan Pérez,juan.perez@example.com,clave12345,Calle 5 # 10-20 Popayán,3001234567,wifi",
-    "Ana Gómez,ana.gomez@example.com,clave12345,Carrera 9 # 4-30 Timbío,,tv",
+    "nombre,email,password,direccion,zona,telefono,tipoServicio",
+    "Juan Pérez,juan.perez@example.com,clave12345,Calle 5 # 10-20 Popayán,Centro,3001234567,wifi",
+    "Ana Gómez,ana.gomez@example.com,clave12345,Carrera 9 # 4-30 Timbío,Timbío,,tv",
   ].join("\n");
 }

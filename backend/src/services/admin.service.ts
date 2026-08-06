@@ -4,7 +4,7 @@ import { messageRepository } from "../repositories/message.repository";
 import { statsRepository } from "../repositories/stats.repository";
 import { ticketRepository } from "../repositories/ticket.repository";
 import { userRepository } from "../repositories/user.repository";
-import { PublicUser, TipoServicio, toPublicUser } from "../models/user.model";
+import { PublicUser, TipoServicio, toPublicUser, Zona } from "../models/user.model";
 import { TicketEstado } from "../models/ticket.model";
 import { ApiError } from "../utils/ApiError";
 import { hashPassword } from "../utils/password";
@@ -20,6 +20,7 @@ export const adminService = {
     email: string;
     password: string;
     direccion: string;
+    zona: Zona;
     telefono?: string;
     tipoServicio: TipoServicio;
   }): Promise<PublicUser> {
@@ -34,6 +35,7 @@ export const adminService = {
       email: input.email,
       passwordHash,
       direccion: input.direccion,
+      zona: input.zona,
       telefono: input.telefono,
       role: "user",
       tipoServicio: input.tipoServicio,

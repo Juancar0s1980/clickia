@@ -7,6 +7,7 @@ export interface User {
   email: string;
   telefono: string | null;
   direccion: string;
+  zona: string | null;
   acepto_datos: boolean;
   acepto_datos_at: string | null;
   role: UserRole;
