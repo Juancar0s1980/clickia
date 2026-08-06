@@ -43,11 +43,17 @@ src/
   panel de **diagnóstico visual** (checklist ✓/○ + badge de estado de red)
   después de cada respuesta, y flujo para escalar a ticket sin salir del chat.
 - **Ticket creado**: número, estado y prioridad, inline en la conversación.
-- **Admin** (`/admin`, solo visible/accesible si `user.role === "admin"`,
-  protegido por `AdminRoute`): registrar clientes con su tipo de servicio
+- **Admin** (protegido por `AdminRoute`, solo si `user.role === "admin"`):
+  para este rol, "Panel" deja de mostrar el dashboard de cliente y se
+  convierte en un panel de estadísticas (`AdminStatsPage`) — totales de
+  usuarios/conversaciones/tickets y una gráfica de barras simple (sin
+  librerías externas) con las fallas más recurrentes detectadas en el chat.
+  "Usuarios" permite registrar clientes con su tipo de servicio
   (Internet/WiFi, TV, o ambos — un `<select>` estándar, no doble-click),
-  listar usuarios, ver las conversaciones de cualquiera, y actualizar el
-  estado de red por zona que consume el chat.
+  listarlos y ver las conversaciones de cualquiera. "Estado de red" actualiza
+  el estado por zona que consume el chat. El admin no tiene acceso al chat de
+  soporte (no es cliente del ISP): el link se oculta y `/chat` redirige a
+  `/dashboard` si se navega ahí directo.
 
 ## Sesión y refresco de token
 

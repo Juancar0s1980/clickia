@@ -1,12 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatResponse, Ticket } from "../types/api";
 import { ChatPage } from "./ChatPage";
 
 const sendMessageMock = vi.fn();
 const createTicketMock = vi.fn();
+let mockIsAdmin = false;
+
+vi.mock("../context/AuthContext", () => ({
+  useAuth: () => ({ isAdmin: mockIsAdmin }),
+}));
 
 vi.mock("../hooks/useConversations", () => ({
   useConversations: () => ({ data: [], isLoading: false }),
@@ -72,6 +77,21 @@ describe("ChatPage", () => {
     sendMessageMock.mockReset();
     createTicketMock.mockReset();
     localStorage.clear();
+    mockIsAdmin = false;
+  });
+
+  it("redirige al panel si un admin intenta entrar al chat de soporte", async () => {
+    mockIsAdmin = true;
+    render(
+      <MemoryRouter initialEntries={["/chat"]}>
+        <Routes>
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/dashboard" element={<div>Panel de administración</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Panel de administración")).toBeInTheDocument();
   });
 
   it("pide la zona antes de mostrar el chat y la recuerda para la próxima vez", async () => {

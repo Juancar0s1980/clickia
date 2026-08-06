@@ -1,6 +1,20 @@
 import { Conversation, Message, NetworkStatus, NetworkServiceStatus, TipoServicio, User } from "../types/api";
 import { httpClient } from "./httpClient";
 
+export interface AdminSummary {
+  totalUsers: number;
+  totalConversations: number;
+  totalTickets: number;
+  openTickets: number;
+}
+
+export interface TopProblem {
+  problemId: string;
+  nombre: string;
+  categoria: string;
+  total: number;
+}
+
 export const adminApi = {
   async createUser(input: {
     nombre: string;
@@ -45,5 +59,15 @@ export const adminApi = {
       estimatedTime,
     });
     return data.status;
+  },
+
+  async getSummary(): Promise<AdminSummary> {
+    const { data } = await httpClient.get<AdminSummary>("/admin/stats/summary");
+    return data;
+  },
+
+  async getTopProblems(): Promise<TopProblem[]> {
+    const { data } = await httpClient.get<{ problems: TopProblem[] }>("/admin/stats/top-problems");
+    return data.problems;
   },
 };

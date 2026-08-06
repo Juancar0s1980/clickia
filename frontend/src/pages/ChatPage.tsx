@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { ChatBubble } from "../components/chat/ChatBubble";
 import { ChatInput } from "../components/chat/ChatInput";
 import { ConversationSidebar } from "../components/chat/ConversationSidebar";
@@ -11,6 +11,7 @@ import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { Spinner } from "../components/ui/Spinner";
 import { ZONES } from "../constants/zones";
+import { useAuth } from "../context/AuthContext";
 import { useConversation, useConversations } from "../hooks/useConversations";
 import { useSendMessage } from "../hooks/useChat";
 import { useCreateTicket } from "../hooks/useTickets";
@@ -21,6 +22,7 @@ import { ChatResponse, Message, Ticket } from "../types/api";
 const QUICK_ACTIONS = ["No tengo internet", "WiFi lento", "Router con luz roja"];
 
 export function ChatPage() {
+  const { isAdmin } = useAuth();
   const location = useLocation();
   const initialConversationId = (location.state as { conversationId?: string } | null)?.conversationId ?? null;
 
@@ -130,6 +132,12 @@ export function ChatPage() {
   }
 
   const isBusy = sendMessage.isPending;
+
+  // El chat de soporte es para clientes; el admin gestiona todo desde /admin.
+  // Se decide despues de llamar todos los hooks para no romper las reglas de hooks.
+  if (isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="flex h-full">

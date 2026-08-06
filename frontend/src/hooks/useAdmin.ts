@@ -46,3 +46,11 @@ export function useUpdateNetworkStatus() {
     },
   });
 }
+
+export function useAdminSummary() {
+  return useQuery({ queryKey: ["admin", "stats", "summary"], queryFn: adminApi.getSummary });
+}
+
+export function useAdminTopProblems() {
+  return useQuery({ queryKey: ["admin", "stats", "top-problems"], queryFn: adminApi.getTopProblems });
+}

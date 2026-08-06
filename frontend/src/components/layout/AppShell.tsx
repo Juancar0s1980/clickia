@@ -19,13 +19,20 @@ export function AppShell() {
           <NavLink to="/dashboard" className={NAV_LINK_CLASS}>
             Panel
           </NavLink>
-          <NavLink to="/chat" className={NAV_LINK_CLASS}>
-            Chat
-          </NavLink>
-          {isAdmin && (
-            <NavLink to="/admin" className={NAV_LINK_CLASS}>
-              Admin
+          {!isAdmin && (
+            <NavLink to="/chat" className={NAV_LINK_CLASS}>
+              Chat
             </NavLink>
+          )}
+          {isAdmin && (
+            <>
+              <NavLink to="/admin" className={NAV_LINK_CLASS}>
+                Usuarios
+              </NavLink>
+              <NavLink to="/admin/network-status" className={NAV_LINK_CLASS}>
+                Estado de red
+              </NavLink>
+            </>
           )}
         </nav>
         <div className="flex items-center gap-3">

@@ -101,4 +101,67 @@ describe("Admin", () => {
       .expect(200);
     expect(chat.body.networkStatus).toMatchObject({ zone: "Norte", status: "falla", estimated_time: "45 minutos" });
   });
+
+  describe("Estadísticas", () => {
+    it("rechaza a un usuario normal", async () => {
+      const { accessToken } = await registerAndLogin("stats-plain");
+      await request(app).get("/api/admin/stats/summary").set("Authorization", `Bearer ${accessToken}`).expect(403);
+    });
+
+    it("resume totales de usuarios, conversaciones y tickets", async () => {
+      const admin = await registerAndLoginAsAdmin("summary-admin");
+      const customer = await registerAndLogin("summary-customer");
+
+      await request(app)
+        .post("/api/chat")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ message: "No tengo internet", zone: "Centro" })
+        .expect(200);
+      await request(app)
+        .post("/api/tickets")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ descripcion: "El internet sigue caído tras los pasos sugeridos." })
+        .expect(201);
+
+      const res = await request(app)
+        .get("/api/admin/stats/summary")
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .expect(200);
+
+      expect(res.body.totalUsers).toBeGreaterThanOrEqual(2);
+      expect(res.body.totalConversations).toBeGreaterThanOrEqual(1);
+      expect(res.body.totalTickets).toBeGreaterThanOrEqual(1);
+      expect(res.body.openTickets).toBeGreaterThanOrEqual(1);
+    });
+
+    it("cuenta el problema detectado con mayor frecuencia", async () => {
+      const admin = await registerAndLoginAsAdmin("top-problems-admin");
+      const customer = await registerAndLogin("top-problems-customer");
+
+      for (let i = 0; i < 3; i++) {
+        await request(app)
+          .post("/api/chat")
+          .set("Authorization", `Bearer ${customer.accessToken}`)
+          .send({ message: "Mi router tiene una luz roja encendida", zone: "Centro" })
+          .expect(200);
+      }
+      await request(app)
+        .post("/api/chat")
+        .set("Authorization", `Bearer ${customer.accessToken}`)
+        .send({ message: "Mi wifi esta lento", zone: "Centro" })
+        .expect(200);
+
+      const res = await request(app)
+        .get("/api/admin/stats/top-problems")
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .expect(200);
+
+      // La tabla diagnostics es compartida por toda la suite (otros archivos tambien
+      // generan diagnosticos), asi que no se afirma que este sea el problema #1 global
+      // -- solo que las 3 repeticiones de "luz roja" se contaron correctamente.
+      const routerProblem = res.body.problems.find((p: { nombre: string }) => p.nombre === "Router con luz roja");
+      expect(routerProblem).toBeDefined();
+      expect(routerProblem.total).toBeGreaterThanOrEqual(3);
+    });
+  });
 });

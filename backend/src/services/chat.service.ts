@@ -1,4 +1,5 @@
 import { conversationRepository } from "../repositories/conversation.repository";
+import { diagnosticRepository } from "../repositories/diagnostic.repository";
 import { messageRepository } from "../repositories/message.repository";
 import { ApiError } from "../utils/ApiError";
 import { generateAiReply } from "./ai/aiReply.service";
@@ -28,6 +29,14 @@ export const chatService = {
     const aiReply = await generateAiReply(input.message, match, networkStatus);
 
     const aiMessage = await messageRepository.create(conversation.id, "ai", aiReply.text);
+
+    // Alimenta las estadisticas de "fallas mas recurrentes" del panel de admin.
+    await diagnosticRepository.create({
+      conversationId: conversation.id,
+      problemId: match?.problem.id ?? null,
+      zone: networkStatus.zone,
+      networkStatus: networkStatus.status,
+    });
 
     return {
       conversation,

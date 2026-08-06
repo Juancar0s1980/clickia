@@ -16,4 +16,7 @@ router.get("/conversations/:id", adminController.getConversationDetail);
 router.get("/network-status", adminController.listNetworkStatus);
 router.patch("/network-status/:zone", validateBody(updateNetworkStatusSchema), adminController.updateNetworkStatus);
 
+router.get("/stats/summary", adminController.getSummary);
+router.get("/stats/top-problems", adminController.getTopProblems);
+
 export default router;

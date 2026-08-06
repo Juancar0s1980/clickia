@@ -1,11 +1,15 @@
 import { conversationRepository } from "../repositories/conversation.repository";
+import { diagnosticRepository } from "../repositories/diagnostic.repository";
 import { messageRepository } from "../repositories/message.repository";
+import { statsRepository } from "../repositories/stats.repository";
 import { userRepository } from "../repositories/user.repository";
 import { PublicUser, TipoServicio, toPublicUser } from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
 import { hashPassword } from "../utils/password";
 import { networkStatusService } from "./networkStatus.service";
 import { NetworkServiceStatus } from "../models/networkStatus.model";
+
+const TOP_PROBLEMS_LIMIT = 10;
 
 export const adminService = {
   async createUser(input: {
@@ -63,5 +67,19 @@ export const adminService = {
 
   async updateNetworkStatus(zone: string, status: NetworkServiceStatus, estimatedTime: string | null) {
     return networkStatusService.setStatus(zone, status, estimatedTime);
+  },
+
+  async getSummary() {
+    return statsRepository.getSummary();
+  },
+
+  async getTopProblems() {
+    const rows = await diagnosticRepository.topProblems(TOP_PROBLEMS_LIMIT);
+    return rows.map((r) => ({
+      problemId: r.problem_id,
+      nombre: r.nombre,
+      categoria: r.categoria,
+      total: Number(r.total),
+    }));
   },
 };

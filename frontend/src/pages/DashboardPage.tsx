@@ -9,9 +9,10 @@ import { useAuth } from "../context/AuthContext";
 import { useConversations } from "../hooks/useConversations";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { zoneStorage } from "../services/zoneStorage";
+import { AdminStatsPage } from "./admin/AdminStatsPage";
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [zone, setZone] = useState(zoneStorage.get() ?? ZONES[0]);
 
@@ -22,6 +23,13 @@ export function DashboardPage() {
 
   const { data: status, isLoading: isStatusLoading } = useNetworkStatus(zone);
   const { data: conversations, isLoading: isConversationsLoading } = useConversations();
+
+  // El admin no es cliente del ISP: en vez del panel de "mi servicio", ve
+  // estadisticas de la operacion. La rama se decide despues de llamar todos
+  // los hooks para no romper las reglas de hooks entre renders.
+  if (isAdmin) {
+    return <AdminStatsPage />;
+  }
 
   const recent = conversations?.slice(0, 5) ?? [];
 

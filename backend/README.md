@@ -54,6 +54,8 @@ Todos bajo el prefijo `/api`.
 | GET | `/api/admin/conversations/:id` | Admin | Detalle de cualquier conversación |
 | GET | `/api/admin/network-status` | Admin | Lista el estado de todas las zonas |
 | PATCH | `/api/admin/network-status/:zone` | Admin | Actualiza estado/tiempo estimado de una zona |
+| GET | `/api/admin/stats/summary` | Admin | Totales: usuarios, conversaciones, tickets |
+| GET | `/api/admin/stats/top-problems` | Admin | Problemas más frecuentes detectados por el chat |
 
 Auth: header `Authorization: Bearer <accessToken>`.
 
@@ -77,6 +79,14 @@ El estado de red (`network_status`, antes un objeto fijo en el código) es
 ahora una tabla real que el admin actualiza vía `PATCH
 /admin/network-status/:zone`; `GET /api/network/status` —y por lo tanto el
 RAG del chat— siempre lee el valor vigente.
+
+### Estadísticas
+
+Cada turno del chat guarda una fila en `diagnostics` (problema detectado,
+zona, estado de red) — antes ese dato se calculaba y se descartaba. El panel
+de admin (`/api/admin/stats/*`) lo agrega para mostrar totales operativos y
+las fallas más recurrentes. Como es una tabla nueva, conversaciones previas
+a esta migración no tienen diagnóstico retroactivo.
 
 ## Integración de IA (Fase 4)
 

@@ -37,4 +37,14 @@ export const adminController = {
     );
     res.status(200).json({ status });
   }),
+
+  getSummary: asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+    const summary = await adminService.getSummary();
+    res.status(200).json(summary);
+  }),
+
+  getTopProblems: asyncHandler(async (_req: AuthenticatedRequest, res: Response) => {
+    const problems = await adminService.getTopProblems();
+    res.status(200).json({ problems });
+  }),
 };
