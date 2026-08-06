@@ -24,7 +24,7 @@ export function createApp(): Express {
   app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === "/health" } }));
 
   app.get("/health", (_req, res) => {
-    res.status(200).json({ status: "ok" });
+    res.status(200).json({ status: "ok", nodeVersion: process.version });
   });
 
   app.use("/api", apiRateLimiter, routes);
