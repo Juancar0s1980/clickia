@@ -11,6 +11,10 @@ export const createUserByAdminSchema = z.object({
   tipoServicio: z.enum(["wifi", "tv", "wifi_tv"]),
 });
 
+export const updateUserStatusSchema = z.object({
+  activo: z.boolean(),
+});
+
 export const updateNetworkStatusSchema = z.object({
   status: z.enum(["operativo", "mantenimiento", "falla"]),
   estimatedTime: z.string().trim().max(50).nullable().optional(),

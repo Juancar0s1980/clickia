@@ -6,6 +6,9 @@ import { User } from "../../types/api";
 import { AdminUsersPage } from "./AdminUsersPage";
 
 const createUserMock = vi.fn();
+const updateUserStatusMock = vi.fn();
+
+const CURRENT_ADMIN = { id: "admin-1" };
 
 const EXISTING_USER: User = {
   id: "user-1",
@@ -31,6 +34,11 @@ vi.mock("../../hooks/useAdmin", () => ({
   useAdminUsers: () => ({ data: [EXISTING_USER], isLoading: false }),
   useCreateUserByAdmin: () => ({ mutateAsync: createUserMock, isPending: false, error: null }),
   useBulkCreateUsers: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateUserStatus: () => ({ mutate: updateUserStatusMock, isPending: false, error: null }),
+}));
+
+vi.mock("../../context/AuthContext", () => ({
+  useAuth: () => ({ user: CURRENT_ADMIN }),
 }));
 
 function renderPage() {
@@ -44,6 +52,7 @@ function renderPage() {
 describe("AdminUsersPage", () => {
   beforeEach(() => {
     createUserMock.mockReset();
+    updateUserStatusMock.mockReset();
   });
 
   it("lista los usuarios existentes", () => {
@@ -79,5 +88,24 @@ describe("AdminUsersPage", () => {
         }),
       ),
     );
+  });
+
+  it("pide confirmación y desactiva al usuario al hacer clic en Eliminar", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderPage();
+
+    await userEvent.click(screen.getByRole("button", { name: "Eliminar" }));
+
+    expect(window.confirm).toHaveBeenCalled();
+    expect(updateUserStatusMock).toHaveBeenCalledWith({ id: "user-1", activo: false });
+  });
+
+  it("no desactiva si el admin cancela la confirmación", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    renderPage();
+
+    await userEvent.click(screen.getByRole("button", { name: "Eliminar" }));
+
+    expect(updateUserStatusMock).not.toHaveBeenCalled();
   });
 });

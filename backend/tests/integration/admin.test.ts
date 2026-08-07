@@ -340,4 +340,66 @@ describe("Admin", () => {
         .expect(400);
     });
   });
+
+  describe("Desactivar usuarios (borrado lógico)", () => {
+    it("rechaza a un usuario normal", async () => {
+      const { accessToken, userId } = await registerAndLogin("deactivate-plain");
+      await request(app)
+        .patch(`/api/admin/users/${userId}/estado`)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ activo: false })
+        .expect(403);
+    });
+
+    it("desactiva a un cliente y le bloquea el login, y lo puede reactivar", async () => {
+      const admin = await registerAndLoginAsAdmin("deactivate-admin");
+      const customer = await registerAndLogin("deactivate-customer");
+
+      const deactivated = await request(app)
+        .patch(`/api/admin/users/${customer.userId}/estado`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ activo: false })
+        .expect(200);
+      expect(deactivated.body.user.activo).toBe(false);
+
+      const blockedLogin = await request(app)
+        .post("/api/auth/login")
+        .send({ email: customer.email, password: customer.password })
+        .expect(401);
+      expect(blockedLogin.body.error).toMatch(/credenciales/i);
+
+      const reactivated = await request(app)
+        .patch(`/api/admin/users/${customer.userId}/estado`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ activo: true })
+        .expect(200);
+      expect(reactivated.body.user.activo).toBe(true);
+
+      await request(app)
+        .post("/api/auth/login")
+        .send({ email: customer.email, password: customer.password })
+        .expect(200);
+    });
+
+    it("no permite que un admin se desactive a sí mismo", async () => {
+      const admin = await registerAndLoginAsAdmin("deactivate-self-admin");
+
+      const res = await request(app)
+        .patch(`/api/admin/users/${admin.userId}/estado`)
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ activo: false })
+        .expect(400);
+      expect(res.body.error).toMatch(/propia cuenta/i);
+    });
+
+    it("responde 404 al desactivar un usuario inexistente", async () => {
+      const admin = await registerAndLoginAsAdmin("deactivate-404-admin");
+
+      await request(app)
+        .patch("/api/admin/users/00000000-0000-0000-0000-000000000000/estado")
+        .set("Authorization", `Bearer ${admin.accessToken}`)
+        .send({ activo: false })
+        .expect(404);
+    });
+  });
 });

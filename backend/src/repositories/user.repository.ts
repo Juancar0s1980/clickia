@@ -67,6 +67,17 @@ export const userRepository = {
     await pool.query("UPDATE users SET role = $1, updated_at = now() WHERE id = $2", [role, id]);
   },
 
+  // "Eliminar" un cliente en el panel de admin es un borrado logico (activo = false), no un
+  // DELETE real: sus conversaciones/tickets/diagnosticos deben seguir consultables (punto 10
+  // del PDF), y auth.service.login ya rechaza el login si activo es false. Reversible.
+  async setActivo(id: string, activo: boolean): Promise<User | null> {
+    const { rows } = await pool.query<User>(
+      "UPDATE users SET activo = $1, updated_at = now() WHERE id = $2 RETURNING *",
+      [activo, id],
+    );
+    return rows[0] ?? null;
+  },
+
   async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
     await pool.query("UPDATE users SET password_hash = $1, updated_at = now() WHERE id = $2", [passwordHash, id]);
   },

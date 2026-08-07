@@ -58,6 +58,11 @@ export const adminApi = {
     return data.users;
   },
 
+  async updateUserStatus(id: string, activo: boolean): Promise<User> {
+    const { data } = await httpClient.patch<{ user: User }>(`/admin/users/${id}/estado`, { activo });
+    return data.user;
+  },
+
   async getUserConversations(userId: string): Promise<Conversation[]> {
     const { data } = await httpClient.get<{ conversations: Conversation[] }>(`/admin/users/${userId}/conversations`);
     return data.conversations;

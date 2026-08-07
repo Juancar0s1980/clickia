@@ -4,10 +4,12 @@ import { BulkUploadPanel } from "../../components/admin/BulkUploadPanel";
 import { CreateUserForm } from "../../components/admin/CreateUserForm";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { ErrorBanner } from "../../components/ui/ErrorBanner";
 import { Spinner } from "../../components/ui/Spinner";
-import { useAdminUsers, useBulkCreateUsers, useCreateUserByAdmin } from "../../hooks/useAdmin";
+import { useAuth } from "../../context/AuthContext";
+import { useAdminUsers, useBulkCreateUsers, useCreateUserByAdmin, useUpdateUserStatus } from "../../hooks/useAdmin";
 import { extractErrorMessage } from "../../services/httpClient";
-import { TipoServicio } from "../../types/api";
+import { TipoServicio, User } from "../../types/api";
 
 const SERVICE_LABELS: Record<TipoServicio, string> = {
   wifi: "Internet / WiFi",
@@ -15,13 +17,32 @@ const SERVICE_LABELS: Record<TipoServicio, string> = {
   wifi_tv: "Internet + TV",
 };
 
+function MapPinIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21s7-6.75 7-12a7 7 0 1 0-14 0c0 5.25 7 12 7 12Z" />
+      <circle cx="12" cy="9" r="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function AdminUsersPage() {
   const navigate = useNavigate();
+  const { user: currentAdmin } = useAuth();
   const { data: users, isLoading } = useAdminUsers();
   const createUser = useCreateUserByAdmin();
   const bulkCreateUsers = useBulkCreateUsers();
+  const updateUserStatus = useUpdateUserStatus();
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
+
+  function handleToggleActivo(target: User) {
+    const verbo = target.activo ? "desactivar" : "reactivar";
+    if (!window.confirm(`¿Seguro que quieres ${verbo} a ${target.nombre}?`)) {
+      return;
+    }
+    updateUserStatus.mutate({ id: target.id, activo: !target.activo });
+  }
 
   async function handleCreate(values: {
     nombre: string;
@@ -41,7 +62,7 @@ export function AdminUsersPage() {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-4xl flex-col gap-6 overflow-y-auto p-6">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-6 overflow-y-auto p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Usuarios registrados</h1>
@@ -92,13 +113,25 @@ export function AdminUsersPage() {
         />
       )}
 
+      {updateUserStatus.error && <ErrorBanner message={extractErrorMessage(updateUserStatus.error)} />}
+
       <Card className="overflow-x-auto p-0">
         {isLoading ? (
           <div className="flex justify-center p-6">
             <Spinner />
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <table className="w-full table-fixed text-left text-sm">
+            <colgroup>
+              <col className="w-[14%]" />
+              <col className="w-[18%]" />
+              <col className="w-[24%]" />
+              <col className="w-[9%]" />
+              <col className="w-[13%]" />
+              <col className="w-[7%]" />
+              <col className="w-[9%]" />
+              <col className="w-[6%]" />
+            </colgroup>
             <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-700 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-3">Nombre</th>
@@ -108,6 +141,7 @@ export function AdminUsersPage() {
                 <th className="px-4 py-3">Servicio</th>
                 <th className="px-4 py-3">Rol</th>
                 <th className="px-4 py-3">Registrado</th>
+                <th className="px-4 py-3">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -115,13 +149,19 @@ export function AdminUsersPage() {
                 <tr
                   key={u.id}
                   onClick={() => navigate(`/admin/users/${u.id}`)}
-                  className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                  className={`cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 ${
+                    !u.activo ? "opacity-50" : ""
+                  }`}
                 >
-                  <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{u.nombre}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.email}</td>
+                  <td className="truncate px-4 py-3 font-medium text-slate-700 dark:text-slate-200" title={u.nombre}>
+                    {u.nombre}
+                  </td>
+                  <td className="truncate px-4 py-3 text-slate-600 dark:text-slate-300" title={u.email}>
+                    {u.email}
+                  </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    <div className="flex items-center gap-2">
-                      <span>{u.direccion}</span>
+                    <div className="flex items-start gap-1.5">
+                      <span className="break-words">{u.direccion}</span>
                       {u.direccion_lat !== null && u.direccion_lon !== null && (
                         <a
                           href={`https://www.openstreetmap.org/?mlat=${u.direccion_lat}&mlon=${u.direccion_lon}#map=18/${u.direccion_lat}/${u.direccion_lon}`}
@@ -133,9 +173,9 @@ export function AdminUsersPage() {
                               ? `Ver en mapa: ${u.direccion_formateada}`
                               : "Ver ubicación en el mapa"
                           }
-                          className="shrink-0 text-xs font-medium text-primary hover:underline dark:text-blue-300"
+                          className="mt-0.5 shrink-0 text-primary hover:text-primary-dark dark:text-blue-300 dark:hover:text-blue-200"
                         >
-                          Ver en mapa
+                          <MapPinIcon />
                         </a>
                       )}
                     </div>
@@ -145,6 +185,27 @@ export function AdminUsersPage() {
                   <td className="px-4 py-3 capitalize text-slate-600 dark:text-slate-300">{u.role}</td>
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                     {new Date(u.fecha_creacion).toLocaleDateString("es-CO")}
+                  </td>
+                  <td className="px-4 py-3">
+                    {u.id === currentAdmin?.id ? (
+                      <span className="text-xs text-slate-400 dark:text-slate-500">Tú</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleActivo(u);
+                        }}
+                        disabled={updateUserStatus.isPending}
+                        className={`text-xs font-medium hover:underline disabled:opacity-50 ${
+                          u.activo
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-green-600 dark:text-green-400"
+                        }`}
+                      >
+                        {u.activo ? "Eliminar" : "Reactivar"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

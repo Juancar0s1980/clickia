@@ -52,6 +52,20 @@ export const adminService = {
     return users.map(toPublicUser);
   },
 
+  // Borrado logico (ver comentario en user.repository.setActivo). Un admin no puede
+  // desactivarse a si mismo -- evita que se quede sin forma de reactivar su propia cuenta.
+  async setUserActivo(userId: string, requestingAdminId: string, activo: boolean): Promise<PublicUser> {
+    if (userId === requestingAdminId && !activo) {
+      throw ApiError.badRequest("No puedes desactivar tu propia cuenta de administrador");
+    }
+
+    const user = await userRepository.setActivo(userId, activo);
+    if (!user) {
+      throw ApiError.notFound("Usuario no encontrado");
+    }
+    return toPublicUser(user);
+  },
+
   // Carga masiva (CSV importado y parseado en el frontend). Cada fila se valida y se
   // procesa de forma independiente: una fila invalida (email duplicado, columnas mal
   // formadas) no debe tumbar el resto del lote.

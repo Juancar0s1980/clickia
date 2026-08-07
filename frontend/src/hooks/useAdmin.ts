@@ -16,6 +16,16 @@ export function useCreateUserByAdmin() {
   });
 }
 
+export function useUpdateUserStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { id: string; activo: boolean }) => adminApi.updateUserStatus(input.id, input.activo),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
+
 export function useBulkCreateUsers() {
   const queryClient = useQueryClient();
   return useMutation({

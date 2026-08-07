@@ -14,6 +14,11 @@ export const adminController = {
     res.status(200).json({ users });
   }),
 
+  updateUserStatus: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const user = await adminService.setUserActivo(req.params.id!, req.userId!, req.body.activo);
+    res.status(200).json({ user });
+  }),
+
   bulkCreateUsers: asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const result = await adminService.bulkCreateUsers(req.body.rows);
     res.status(207).json(result);
