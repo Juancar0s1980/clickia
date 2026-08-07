@@ -54,6 +54,8 @@ Verificado contra la documentación oficial de Render el 2026-08-06:
    | `AI_PROVIDER` | (vacío) |
    | `WEATHER_ENABLED` | `true` |
    | `IP_LOOKUP_ENABLED` | `true` |
+   | `GEOCODING_ENABLED` | `true` |
+   | `OPENCAGE_API_KEY` | Tu API key real de OpenCage (gratis en https://opencagedata.com/api, sin tarjeta) — si se deja vacía, el registro sigue funcionando pero no completa lat/lon |
    | `LOG_LEVEL` | `info` |
    | `RATE_LIMIT_WINDOW_MS` | `900000` |
    | `RATE_LIMIT_MAX` | `300` |
@@ -100,7 +102,9 @@ Verificado contra la documentación oficial de Render el 2026-08-06:
   consentimiento), iniciar sesión, hablar con el chat, ver que el clima/ISP
   aparecen en el diagnóstico, crear un ticket.
 - Iniciar sesión con `ADMIN_EMAIL`/`ADMIN_PASSWORD` del paso 2.7, confirmar
-  que entra como admin y puede ver usuarios/tickets/estado de red.
+  que entra como admin y puede ver usuarios/tickets/estado de red, y que la
+  tabla de usuarios muestra el enlace "Ver en mapa" (requiere
+  `OPENCAGE_API_KEY` configurada) junto a la dirección de cada cliente.
 - Anotar en la entrega: *"El primer acceso puede tardar ~30-60s por el
   plan gratuito de Render (el backend se duerme tras 15 min sin uso)."*
 

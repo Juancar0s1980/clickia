@@ -8,6 +8,7 @@ import { PublicUser, TipoServicio, toPublicUser, Zona } from "../models/user.mod
 import { TicketEstado } from "../models/ticket.model";
 import { ApiError } from "../utils/ApiError";
 import { hashPassword } from "../utils/password";
+import { geocodingService } from "./geocoding.service";
 import { networkStatusService } from "./networkStatus.service";
 import { NetworkServiceStatus } from "../models/networkStatus.model";
 import { createUserByAdminSchema } from "../validators/admin.validator";
@@ -30,6 +31,7 @@ export const adminService = {
     }
 
     const passwordHash = await hashPassword(input.password);
+    const geocode = (await geocodingService.geocodeAddress(input.direccion, input.zona)) ?? undefined;
     const user = await userRepository.create({
       nombre: input.nombre,
       email: input.email,
@@ -39,6 +41,7 @@ export const adminService = {
       telefono: input.telefono,
       role: "user",
       tipoServicio: input.tipoServicio,
+      geocode,
     });
 
     return toPublicUser(user);

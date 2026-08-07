@@ -4,6 +4,7 @@ import { refreshTokenRepository } from "../repositories/refreshToken.repository"
 import { userRepository } from "../repositories/user.repository";
 import { toPublicUser, PublicUser, User, Zona } from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
+import { geocodingService } from "./geocoding.service";
 import { signAccessToken } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/password";
 
@@ -41,6 +42,7 @@ export const authService = {
     }
 
     const passwordHash = await hashPassword(input.password);
+    const geocode = (await geocodingService.geocodeAddress(input.direccion, input.zona)) ?? undefined;
     const user = await userRepository.create({
       nombre: input.nombre,
       email: input.email,
@@ -49,6 +51,7 @@ export const authService = {
       zona: input.zona,
       telefono: input.telefono,
       aceptoDatos: input.aceptoDatos,
+      geocode,
     });
 
     return toPublicUser(user);

@@ -189,6 +189,16 @@ El registro de usuario exige la dirección de la casa del cliente
 `Centro|Norte|Sur|Occidente|Timbío`) — así el admin puede indicarle rápido a
 un técnico a qué sector ir sin tener que leer la dirección completa.
 
+**Geocoding de la dirección (4ta API, `geocoding.service.ts`):** al
+registrar un cliente (por sí mismo o por el admin), `direccion` + `zona` se
+envían a OpenCage (requiere `OPENCAGE_API_KEY`, gratis hasta 2500
+peticiones/día) y el resultado (`direccion_lat`, `direccion_lon`,
+`direccion_formateada`, `direccion_confianza`) se guarda en `users`. El
+admin ve un enlace "Ver en mapa" en la tabla de usuarios (OpenStreetMap
+centrado en esas coordenadas) para ubicar exactamente dónde despachar un
+técnico. Se degrada a `null` sin bloquear el registro si no hay API key
+configurada, la petición falla, o la dirección no se pudo geocodificar.
+
 **Nota sobre `/api/weather` en producción (Render free tier):** Open-Meteo
 limita peticiones por IP; el plan gratuito de Render comparte un pool de
 salida entre todas las apps de todos sus usuarios, así que ese límite se
@@ -272,16 +282,16 @@ npm test
 
 `jest.global-setup.js` aplica migraciones + seed una sola vez antes de toda
 la suite (reutiliza `src/database/migrate.ts`). `GEMINI_API_KEY`,
-`GROQ_API_KEY`, `WEATHER_ENABLED` e `IP_LOOKUP_ENABLED` van vacías/en
-`false` a propósito en `.env.test.example`: sin proveedor de IA
-configurado, `/chat` siempre cae a la plantilla de fallback, y sin las
-otras dos APIs activas los tests no dependen de servicios externos ni de
-red — todo determinista.
+`GROQ_API_KEY`, `WEATHER_ENABLED`, `IP_LOOKUP_ENABLED` y
+`GEOCODING_ENABLED` van vacías/en `false` a propósito en
+`.env.test.example`: sin proveedor de IA configurado, `/chat` siempre cae
+a la plantilla de fallback, y sin las otras tres APIs activas los tests
+no dependen de servicios externos ni de red — todo determinista.
 
-**Cobertura (142 tests, 18 suites):** además de lo listado abajo (vigente
+**Cobertura (152 tests, 19 suites):** además de lo listado abajo (vigente
 desde la Fase 7), se agregaron suites para cada pieza nueva:
 `plan.service.test.ts`, `weather.service.test.ts`, `ipLookup.service.test.ts`,
-`topicGuard.service.test.ts`, `chat.service.test.ts` (memoria de
+`geocoding.service.test.ts`, `topicGuard.service.test.ts`, `chat.service.test.ts` (memoria de
 conversación, cuándo se consultan clima/ISP, persistencia en
 `diagnostics`), `promptBuilder.test.ts`, y ampliaciones de
 `knowledgeBase.service.test.ts` (regresión del bug de falso positivo),

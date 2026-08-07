@@ -10,6 +10,10 @@ export interface User {
   telefono: string | null;
   direccion: string;
   zona: Zona | null;
+  direccion_lat: number | null;
+  direccion_lon: number | null;
+  direccion_formateada: string | null;
+  direccion_confianza: number | null;
   acepto_datos: boolean;
   acepto_datos_at: Date | null;
   role: UserRole;

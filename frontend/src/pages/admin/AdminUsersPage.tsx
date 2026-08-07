@@ -119,7 +119,27 @@ export function AdminUsersPage() {
                 >
                   <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{u.nombre}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.email}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.direccion}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center gap-2">
+                      <span>{u.direccion}</span>
+                      {u.direccion_lat !== null && u.direccion_lon !== null && (
+                        <a
+                          href={`https://www.openstreetmap.org/?mlat=${u.direccion_lat}&mlon=${u.direccion_lon}#map=18/${u.direccion_lat}/${u.direccion_lon}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          title={
+                            u.direccion_formateada
+                              ? `Ver en mapa: ${u.direccion_formateada}`
+                              : "Ver ubicación en el mapa"
+                          }
+                          className="shrink-0 text-xs font-medium text-primary hover:underline dark:text-blue-300"
+                        >
+                          Ver en mapa
+                        </a>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{u.zona ?? "—"}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{SERVICE_LABELS[u.tipo_servicio]}</td>
                   <td className="px-4 py-3 capitalize text-slate-600 dark:text-slate-300">{u.role}</td>

@@ -30,6 +30,11 @@ export const env = {
   // ip-api.com tampoco usa API key; mismo motivo que weatherEnabled.
   ipLookupEnabled: process.env.IP_LOOKUP_ENABLED !== "false",
 
+  // OpenCage (geocoding) si usa API key real, a diferencia de las dos anteriores. Vacio =
+  // geocoding.service se desactiva solo (no revienta el registro, solo no completa esos campos).
+  opencageApiKey: process.env.OPENCAGE_API_KEY ?? "",
+  geocodingEnabled: process.env.GEOCODING_ENABLED !== "false",
+
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
   rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 300),
   authRateLimitMax: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 10),
