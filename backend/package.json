@@ -14,6 +14,7 @@
     "migrate": "tsx src/database/migrate.ts",
     "seed": "tsx src/database/migrate.ts --seed",
     "create-admin": "tsx scripts/createAdmin.ts",
+    "cleanup-test-users": "tsx scripts/cleanupTestUsers.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest"
   },
