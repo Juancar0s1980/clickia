@@ -5,10 +5,13 @@ import { zoneStorage } from "../services/zoneStorage";
 import { User } from "../types/api";
 
 // Si el usuario ya registro su zona (casa), la reutilizamos como zona por defecto en
-// el chat/dashboard para no volver a preguntarla — solo si aun no hay una guardada
-// localmente (p. ej. porque el usuario ya la cambio a mano en esta sesion).
+// el chat/dashboard para no volver a preguntarla. Se sincroniza SIEMPRE al iniciar sesion
+// (no solo si zoneStorage esta vacio): localStorage es por navegador, no por cuenta, asi
+// que un valor de una sesion anterior (otra cuenta, o pruebas previas) no debe pisar la
+// zona real de la cuenta que acaba de iniciar sesion. Dentro de la sesion, el usuario
+// puede seguir cambiandola a mano (link "cambiar" en el chat / selector del dashboard).
 function seedZoneFromUser(user: User | null): void {
-  if (user?.zona && !zoneStorage.get()) {
+  if (user?.zona) {
     zoneStorage.set(user.zona);
   }
 }
